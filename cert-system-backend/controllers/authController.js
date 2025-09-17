@@ -77,7 +77,6 @@ exports.loginRequestOtp = async (req, res) => {
 };
 
 // Step 2: User submits email and OTP. If correct, return JWT and user data.
-// Accepts either the correct OTP or the test OTP '9999'
 exports.loginVerifyOtp = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -98,8 +97,8 @@ exports.loginVerifyOtp = async (req, res) => {
       delete otpStore[email];
       return res.status(400).json({ msg: "OTP expired. Please login again." });
     }
-    // Accept either correct OTP or '9999' as a test bypass
-    if (otp !== otpRecord.otp && otp !== '9999') {
+    // Only accept correct OTP
+    if (otp !== otpRecord.otp) {
       console.log(`Invalid OTP entered for email: ${email}. Expected: ${otpRecord.otp}, Received: ${otp}`);
       return res.status(400).json({ msg: "Invalid OTP" });
     }

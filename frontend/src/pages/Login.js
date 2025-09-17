@@ -18,7 +18,7 @@ const otpSchema = Yup.object().shape({
     .length(6, "OTP must be 6 digits"),
 });
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = "https://nebsam-cert-system.onrender.com";
 
 const Login = () => {
   const { setAuth } = useContext(AuthContext); // setAuth for global state
