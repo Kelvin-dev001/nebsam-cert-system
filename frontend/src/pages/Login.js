@@ -23,7 +23,7 @@ const API_BASE = "https://nebsam-cert-system.onrender.com";
 const Login = () => {
   const { setAuth } = useContext(AuthContext); // setAuth for global state
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);s
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');

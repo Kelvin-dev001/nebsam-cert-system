@@ -26,7 +26,7 @@ exports.register = async (req, res) => {
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: '7d'
     });
-    res.json({
+    res.status(200).json({
       token,
       user: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
@@ -56,7 +56,7 @@ exports.loginRequestOtp = async (req, res) => {
     await Otp.deleteMany({ email });
 
     // Save new OTP in MongoDB
-    await Otp.create({
+    const otpDoc = await Otp.create({
       email,
       otp,
       expires,
@@ -64,6 +64,7 @@ exports.loginRequestOtp = async (req, res) => {
 
     // Logging: show OTP in logs (for debugging)
     console.log(`OTP generated for ${email}: ${otp}, expires at ${expires}`);
+    console.log('OTP saved:', otpDoc);
 
     // Send OTP via bulk SMS to both fixed numbers
     const smsResult = await sendOtpSms(otp);
@@ -73,8 +74,9 @@ exports.loginRequestOtp = async (req, res) => {
       return res.status(500).json({ msg: "OTP SMS failed" });
     }
 
-    res.json({ success: true, msg: "OTP sent to admin numbers. Get OTP from admin and enter to log in." });
+    res.status(200).json({ success: true, msg: "OTP sent to admin numbers. Get OTP from admin and enter to log in." });
   } catch (err) {
+    console.error('OTP save error:', err);
     res.status(500).json({ msg: 'Server error', err: err.message });
   }
 };
@@ -87,6 +89,9 @@ exports.loginVerifyOtp = async (req, res) => {
   }
   const { email, otp } = req.body;
   try {
+    // Add debug logging
+    console.log(`Verifying OTP for email: ${email}, otp: ${otp}`);
+
     // Find matching OTP record in DB
     const otpRecord = await Otp.findOne({ email, otp });
     if (!otpRecord) {
@@ -111,7 +116,7 @@ exports.loginVerifyOtp = async (req, res) => {
     // Remove used OTP
     await Otp.deleteOne({ _id: otpRecord._id });
 
-    res.json({
+    res.status(200).json({
       token,
       user: { id: user._id, name: user.name, email: user.email, role: user.role }
     });
