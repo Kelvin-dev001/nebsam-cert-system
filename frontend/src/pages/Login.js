@@ -23,7 +23,7 @@ const API_BASE = "https://nebsam-cert-system.onrender.com";
 const Login = () => {
   const { setAuth } = useContext(AuthContext); // setAuth for global state
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1);s
   const [loading, setLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -80,9 +80,16 @@ const Login = () => {
         setError(res.data.msg || "Invalid OTP");
       }
     } catch (err) {
-      setError(err.response?.data?.msg || "OTP verification error");
-    } finally {
-      setLoading(false);
+      // Show full backend error response for debugging
+      console.log("OTP verification error response:", err.response?.data);
+      if (err.response?.data?.msg) {
+        setError(err.response.data.msg);
+      } else if (err.response?.data?.errors) {
+        // Express-validator errors array
+        setError(err.response.data.errors.map(e => e.msg).join(", "));
+      } else {
+        setError("OTP verification error");
+      }
     }
   };
 
