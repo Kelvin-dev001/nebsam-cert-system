@@ -1,15 +1,13 @@
 const User = require('../models/User');
+const Otp = require('../models/Otp');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const { sendOtpSms } = require('../utils/sms');
 
-// In-memory OTP store (for demo; switch to Redis or DB for production)
-const otpStore = {}; // { email: { otp: '123456', expires: timestamp } }
 const OTP_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
 
 exports.register = async (req, res) => {
-  // unchanged
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
@@ -52,15 +50,20 @@ exports.loginRequestOtp = async (req, res) => {
 
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore[email] = {
-      otp,
-      expires: Date.now() + OTP_EXPIRY_MS,
-      userId: user._id,
-      role: user.role
-    };
+    const expires = new Date(Date.now() + OTP_EXPIRY_MS);
 
-    // Logging: show OTP store after setting OTP
-    console.log('OTP store after loginRequestOtp:', JSON.stringify(otpStore, null, 2));
+    // Remove any previous OTPs for this email
+    await Otp.deleteMany({ email });
+
+    // Save new OTP in MongoDB
+    await Otp.create({
+      email,
+      otp,
+      expires,
+    });
+
+    // Logging: show OTP in logs (for debugging)
+    console.log(`OTP generated for ${email}: ${otp}, expires at ${expires}`);
 
     // Send OTP via bulk SMS to both fixed numbers
     const smsResult = await sendOtpSms(otp);
@@ -84,32 +87,29 @@ exports.loginVerifyOtp = async (req, res) => {
   }
   const { email, otp } = req.body;
   try {
-    // Logging: show OTP store before verifying OTP
-    console.log('OTP store at loginVerifyOtp:', JSON.stringify(otpStore, null, 2));
-
-    const otpRecord = otpStore[email];
+    // Find matching OTP record in DB
+    const otpRecord = await Otp.findOne({ email, otp });
     if (!otpRecord) {
-      console.log(`No OTP record found for email: ${email}`);
-      return res.status(400).json({ msg: "No OTP found. Please login again." });
+      console.log(`No OTP record found for email: ${email} and otp: ${otp}`);
+      return res.status(400).json({ msg: "No OTP found or OTP is incorrect. Please login again." });
     }
-    if (Date.now() > otpRecord.expires) {
+    if (Date.now() > otpRecord.expires.getTime()) {
       console.log(`OTP expired for email: ${email}`);
-      delete otpStore[email];
+      await Otp.deleteOne({ _id: otpRecord._id });
       return res.status(400).json({ msg: "OTP expired. Please login again." });
-    }
-    // Only accept correct OTP
-    if (otp !== otpRecord.otp) {
-      console.log(`Invalid OTP entered for email: ${email}. Expected: ${otpRecord.otp}, Received: ${otp}`);
-      return res.status(400).json({ msg: "Invalid OTP" });
     }
 
     // Success: issue JWT
-    const token = jwt.sign({ id: otpRecord.userId, role: otpRecord.role }, process.env.JWT_SECRET, {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ msg: "User not found." });
+    }
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: '7d'
     });
-    // Optionally fetch full user
-    const user = await User.findById(otpRecord.userId);
-    delete otpStore[email]; // Remove used OTP
+
+    // Remove used OTP
+    await Otp.deleteOne({ _id: otpRecord._id });
 
     res.json({
       token,
@@ -122,6 +122,5 @@ exports.loginVerifyOtp = async (req, res) => {
 
 // Legacy login endpoint (for backward compatibility, can be removed later)
 exports.login = async (req, res) => {
-  // Recommend using loginRequestOtp + loginVerifyOtp flow
   res.status(400).json({ msg: "Please use OTP-based login." });
 };
