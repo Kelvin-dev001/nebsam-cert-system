@@ -47,12 +47,14 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
+      // Normalize email before sending and storing
+      const normalizedEmail = data.email.trim().toLowerCase();
       const res = await axios.post(`${API_BASE}/api/auth/login/request-otp`, {
-        email: data.email,
+        email: normalizedEmail,
         password: data.password,
       });
       if (res.data.success) {
-        setLoginData({ email: data.email, password: data.password });
+        setLoginData({ email: normalizedEmail, password: data.password });
         setStep(2);
       } else {
         setError(res.data.msg || "Unknown error");
@@ -69,9 +71,12 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
+      // Normalize email and OTP before sending
+      const normalizedEmail = loginData.email.trim().toLowerCase();
+      const normalizedOtp = String(data.otp).trim();
       const res = await axios.post(`${API_BASE}/api/auth/login/verify-otp`, {
-        email: loginData.email,
-        otp: data.otp,
+        email: normalizedEmail,
+        otp: normalizedOtp,
       });
       if (res.data.token && res.data.user) {
         setAuth({ token: res.data.token, user: res.data.user }); // Save to context/global state
@@ -90,6 +95,8 @@ const Login = () => {
       } else {
         setError("OTP verification error");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
