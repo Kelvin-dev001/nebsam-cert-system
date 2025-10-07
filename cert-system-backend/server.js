@@ -4,7 +4,14 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const app = express();
-app.use(cors()); // If needed: cors({ origin: ['http://localhost:3000', 'https://your-frontend'], credentials: true })
+const allowedOrigins = [
+  'https://nebsam-cert-system.vercel.app',
+  'http://localhost:3000'
+];
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 app.use(express.json());
 
 // Helpful in dev/staging to see Mongoose queries (set MONGOOSE_DEBUG=true)
