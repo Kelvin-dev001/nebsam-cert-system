@@ -8,7 +8,7 @@ const Otp = require('../models/Otp');
 let sendOtpSms = async () => true;
 try {
   // If sms.js is at backend root, this path is correct from controllers/
-  const sms = require('../sms');
+  const sms = require('../utils/sms');
   if (sms && typeof sms.sendOtpSms === 'function') {
     sendOtpSms = sms.sendOtpSms;
   }
