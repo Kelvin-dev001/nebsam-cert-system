@@ -277,3 +277,14 @@ exports.shareCertificate = async (req, res) => {
     res.status(500).json({ msg: "Server error", error: err.message });
   }
 };
+// POST /api/auth/register
+exports.register = async (req, res) => {
+  // Implement registration logic here, or placeholder:
+  return res.status(501).json({ msg: 'Not implemented' });
+};
+
+// POST /api/auth/login
+exports.login = async (req, res) => {
+  // Implement legacy login logic here, or placeholder:
+  return res.status(501).json({ msg: 'Not implemented' });
+};
