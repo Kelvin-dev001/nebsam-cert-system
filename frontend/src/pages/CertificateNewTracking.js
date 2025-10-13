@@ -60,8 +60,8 @@ const CertificateNewTracking = () => {
         `${API_BASE}/api/certificates`,
         {
           ...data,
-          type: "tracking",
-          createdBy: user?.id || user?._id // FIX: Pass createdBy from logged in user
+          type: "tracking"
+          
         },
         {
           headers: { Authorization: `Bearer ${token}` }
