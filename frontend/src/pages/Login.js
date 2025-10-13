@@ -18,7 +18,7 @@ const otpSchema = Yup.object().shape({
     .length(6, "OTP must be 6 digits"),
 });
 
-const API_BASE = "https://nebsam-cert-system.onrender.com";
+const API_BASE = "const API_BASE = process.env.REACT_APP_API_BASE;";
 
 const Login = () => {
   const { setAuth } = useContext(AuthContext); // setAuth for global state
@@ -67,11 +67,11 @@ const Login = () => {
   };
 
   // Step 2 handler: Verify OTP
+  const { setUser, setToken } = useContext(AuthContext);
   const onSubmitOtp = async (data) => {
     setLoading(true);
     setError('');
     try {
-      // Normalize email and OTP before sending
       const normalizedEmail = loginData.email.trim().toLowerCase();
       const normalizedOtp = String(data.otp).trim();
       const res = await axios.post(`${API_BASE}/api/auth/login/verify-otp`, {
@@ -79,18 +79,17 @@ const Login = () => {
         otp: normalizedOtp,
       });
       if (res.data.token && res.data.user) {
-        setAuth({ token: res.data.token, user: res.data.user }); // Save to context/global state
+        setToken(res.data.token);
+        setUser(res.data.user);
         navigate("/dashboard");
       } else {
         setError(res.data.msg || "Invalid OTP");
       }
     } catch (err) {
-      // Show full backend error response for debugging
       console.log("OTP verification error response:", err.response?.data);
       if (err.response?.data?.msg) {
         setError(err.response.data.msg);
       } else if (err.response?.data?.errors) {
-        // Express-validator errors array
         setError(err.response.data.errors.map(e => e.msg).join(", "));
       } else {
         setError("OTP verification error");

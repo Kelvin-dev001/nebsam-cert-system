@@ -55,9 +55,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
   };
 
-  const value = { user, token, login, register, logout, loading, isAuthenticated: !!token };
+  const value = { user, token, login, register, logout, loading, isAuthenticated: !!token, setUser, setToken };
 
-  // Set axios default header
   useEffect(() => {
     axios.defaults.headers.common["Authorization"] = token ? `Bearer ${token}` : "";
   }, [token]);
