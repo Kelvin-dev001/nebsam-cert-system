@@ -6,6 +6,7 @@ const cors = require('cors');
 const app = express();
 const allowedOrigins = [
   'https://nebsam-cert-system.vercel.app',
+  'https://nebsam-cert-system-6iy7kwz4y-kelvins-projects-1de5cca3.vercel.app', 
   'http://localhost:3000'
 ];
 app.use(cors({
