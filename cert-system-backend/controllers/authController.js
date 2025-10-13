@@ -29,6 +29,54 @@ exports.validateVerifyOtp = [
   check('otp', 'OTP is required and must be 6 digits').isLength({ min: 6, max: 6 }),
 ];
 
+// POST /api/auth/register
+exports.register = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  const { name, email, password } = req.body;
+
+  try {
+    // Check if user exists
+    let user = await User.findOne({ email: normalizeEmail(email) });
+    if (user) {
+      return res.status(400).json({ msg: 'User already exists' });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create user
+    const newUser = new User({
+      name: name.trim(),
+      email: normalizeEmail(email),
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+
+    // Create JWT token
+    const payload = { user: { id: newUser.id, role: newUser.role } };
+    const token = jwt.sign(payload, process.env.JWT_SECRET || 'devsecret', { expiresIn: '12h' });
+
+    // Respond with new user and token
+    return res.status(201).json({
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+      },
+      token
+    });
+  } catch (err) {
+    console.error('[register] error:', err);
+    return res.status(500).json({ msg: 'Server error' });
+  }
+};
+
 // POST /api/auth/login/request-otp
 exports.loginRequestOtp = async (req, res) => {
   console.log('[route] /login/request-otp hit');
@@ -142,23 +190,8 @@ exports.loginVerifyOtp = async (req, res) => {
     return res.status(500).json({ msg: 'Server error' });
   }
 };
-// POST /api/auth/register
-exports.register = async (req, res) => {
-  // Implement registration logic here, or placeholder:
-  return res.status(501).json({ msg: 'Not implemented' });
-};
 
-// POST /api/auth/login
-exports.login = async (req, res) => {
-  // Implement legacy login logic here, or placeholder:
-  return res.status(501).json({ msg: 'Not implemented' });
-};
-// POST /api/auth/register
-exports.register = async (req, res) => {
-  return res.status(501).json({ msg: 'Register handler not implemented' });
-};
-
-// Legacy login endpoint
+// Legacy login endpoint (optional, not implemented)
 exports.login = async (req, res) => {
   return res.status(501).json({ msg: 'Login handler not implemented' });
 };
