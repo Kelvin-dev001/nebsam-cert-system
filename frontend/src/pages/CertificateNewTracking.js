@@ -32,7 +32,6 @@ const trackingDevices = [
   "Nebsam Tipper Tracker"
 ];
 
-// Use your actual backend API base!
 const API_BASE = process.env.REACT_APP_API_BASE;
 
 const schema = Yup.object().shape({
@@ -52,14 +51,22 @@ const schema = Yup.object().shape({
 
 const CertificateNewTracking = () => {
   const navigate = useNavigate();
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext); // Make sure user is included
   const { control, handleSubmit, formState: { errors } } = useForm({ resolver: yupResolver(schema) });
 
   const onSubmit = async (data) => {
     try {
-      const res = await axios.post(`${API_BASE}/api/certificates`, { ...data, type: "tracking" }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.post(
+        `${API_BASE}/api/certificates`,
+        {
+          ...data,
+          type: "tracking",
+          createdBy: user?.id || user?._id // FIX: Pass createdBy from logged in user
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
       navigate(`/certificates/${res.data._id}/preview`);
     } catch (err) {
       alert(err.response?.data?.msg || "Submission error");
