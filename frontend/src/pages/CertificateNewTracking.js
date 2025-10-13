@@ -7,10 +7,33 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
-const makes = ["Toyota", "Nissan", "Isuzu"];
-const bodyTypes = ["Pickup", "Lorry", "Saloon"];
-const trackingDevices = ["DeviceA", "DeviceB", "DeviceC"]; // Replace with real data
-const API_BASE = "http://localhost:5000";
+// Full list of vehicle makes
+const makes = [
+  "Toyota", "Nissan", "Isuzu", "Mazda", "Mitsubishi", "Honda", "Subaru", "Suzuki", "Ford", "Volkswagen",
+  "Mercedes-Benz", "BMW", "Chevrolet", "Hyundai", "Kia", "Land Rover", "Peugeot", "Fiat", "Jeep", "Scania", "DAF"
+];
+
+// Full list of body types
+const bodyTypes = [
+  "Pickup", "Lorry", "Saloon", "Station Wagon", "SUV", "Van", "Minibus", "Bus", "Tipper", "Trailer",
+  "Concrete Mixer", "Box Truck", "Flatbed", "Tank Truck", "Double Cabin", "Single Cabin"
+];
+
+// Updated tracking devices list
+const trackingDevices = [
+  "Nebsam Fuel Monitor",
+  "Nebsam Basic Tracker",
+  "Nebsam Magnetic Tracker",
+  "Nebsmart Alarm",
+  "Nebsam Hybrid Tracker",
+  "Nebsam Comprehensive Hybrid Tracker",
+  "Nebsam Bluetooth Tracker",
+  "Nebsam Bluetooth Tracker Pro",
+  "Nebsam Tipper Tracker"
+];
+
+// Use your actual backend API base!
+const API_BASE = process.env.REACT_APP_API_BASE;
 
 const schema = Yup.object().shape({
   vehicleRegNumber: Yup.string().required("Required"),
@@ -55,14 +78,34 @@ const CertificateNewTracking = () => {
           </Grid>
           <Grid item xs={12} sm={6}>
             <Controller name="make" control={control} render={({ field }) => (
-              <TextField label="Make" select fullWidth {...field} error={!!errors.make} helperText={errors.make?.message}>
+              <TextField
+                label="Make"
+                select
+                fullWidth
+                variant="outlined"
+                {...field}
+                error={!!errors.make}
+                helperText={errors.make?.message}
+                SelectProps={{ displayEmpty: true }}
+              >
+                <MenuItem value=""><em>Select Make</em></MenuItem>
                 {makes.map((m) => <MenuItem key={m} value={m}>{m}</MenuItem>)}
               </TextField>
             )} />
           </Grid>
           <Grid item xs={12} sm={6}>
             <Controller name="bodyType" control={control} render={({ field }) => (
-              <TextField label="Body Type" select fullWidth {...field} error={!!errors.bodyType} helperText={errors.bodyType?.message}>
+              <TextField
+                label="Body Type"
+                select
+                fullWidth
+                variant="outlined"
+                {...field}
+                error={!!errors.bodyType}
+                helperText={errors.bodyType?.message}
+                SelectProps={{ displayEmpty: true }}
+              >
+                <MenuItem value=""><em>Select Body Type</em></MenuItem>
                 {bodyTypes.map((type) => <MenuItem key={type} value={type}>{type}</MenuItem>)}
               </TextField>
             )} />
@@ -74,7 +117,17 @@ const CertificateNewTracking = () => {
           </Grid>
           <Grid item xs={12} sm={6}>
             <Controller name="deviceFittedWith" control={control} render={({ field }) => (
-              <TextField label="Device Fitted With" select fullWidth {...field} error={!!errors.deviceFittedWith} helperText={errors.deviceFittedWith?.message}>
+              <TextField
+                label="Device Fitted With"
+                select
+                fullWidth
+                variant="outlined"
+                {...field}
+                error={!!errors.deviceFittedWith}
+                helperText={errors.deviceFittedWith?.message}
+                SelectProps={{ displayEmpty: true }}
+              >
+                <MenuItem value=""><em>Select Device</em></MenuItem>
                 {trackingDevices.map((dev) => <MenuItem key={dev} value={dev}>{dev}</MenuItem>)}
               </TextField>
             )} />
