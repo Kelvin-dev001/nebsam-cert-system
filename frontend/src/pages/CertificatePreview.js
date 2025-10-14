@@ -273,6 +273,8 @@ const CertificatePreview = () => {
             ? `Approved at ${cert.approvedAt?.slice(0, 19).replace("T", " ")}`
             : "Not Approved"}
         </Typography>
+        {/* REMOVED Created By */}
+        {/* No <Typography> for createdBy! */}
       </Stack>
 
       {/* Approve & Print Buttons */}

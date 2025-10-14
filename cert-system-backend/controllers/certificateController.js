@@ -247,6 +247,9 @@ exports.shareCertificate = async (req, res) => {
     doc.text(`Approved: ${cert.approved ? 'Yes' : 'No'}`);
     if (cert.approvedAt) doc.text(`Approved At: ${cert.approvedAt.toISOString().slice(0, 19).replace('T', ' ')}`);
 
+    // *** REMOVED CREATED BY LINE ***
+    // No doc.text for createdBy!
+
     if (cert.type === "tracking") {
       doc.moveDown();
       doc.fontSize(14).text(`Vehicle Reg Number: ${cert.vehicleRegNumber}`);
