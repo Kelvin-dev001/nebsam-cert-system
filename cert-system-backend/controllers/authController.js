@@ -57,8 +57,8 @@ exports.register = async (req, res) => {
 
     await newUser.save();
 
-    // Create JWT token
-    const payload = { user: { id: newUser.id, role: newUser.role } };
+    // FIX: Create JWT token with { id, role } at root
+    const payload = { id: newUser.id, role: newUser.role };
     const token = jwt.sign(payload, process.env.JWT_SECRET || 'devsecret', { expiresIn: '12h' });
 
     // Respond with new user and token
@@ -165,14 +165,14 @@ exports.loginVerifyOtp = async (req, res) => {
     // OTP is valid; delete for single use
     await Otp.deleteOne({ _id: otpRecord._id });
 
-    // Create token
+    // Create token (FIX: Use { id, role } at root)
     const user = await User.findOne({ email });
     if (!user) {
       console.error('[verify-otp] user disappeared for email:', email);
       return res.status(400).json({ msg: 'User not found' });
     }
 
-    const payload = { user: { id: user.id, role: user.role || 'user' } };
+    const payload = { id: user.id, role: user.role || 'user' };
     const token = jwt.sign(payload, process.env.JWT_SECRET || 'devsecret', { expiresIn: '12h' });
 
     console.log('[verify-otp] success for:', email);
