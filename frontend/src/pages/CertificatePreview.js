@@ -18,7 +18,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = process.env.REACT_APP_API_BASE;
 
 const CertificatePreview = () => {
   const { id } = useParams();
@@ -88,7 +88,7 @@ const CertificatePreview = () => {
       setApproveMsg(msg);
       setSnackbar({ open: true, message: msg, severity: "error" });
     } finally {
-      setApproveLoading(false);
+      setApproveLoading(false); 
     }
   };
 
