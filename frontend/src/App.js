@@ -10,6 +10,7 @@ import CertificateNewRadio from "./pages/CertificateNewRadio";
 import CertificatePreview from "./pages/CertificatePreview";
 import CertificateShare from "./pages/CertificateShare";
 import CertificateHistory from "./pages/CertificateHistory";
+import CertificateEdit from "./pages/CertificateEdit";
 import AppBar from "./components/AppBar";
 
 function App() {
