@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem("token") || "");
   const [loading, setLoading] = useState(false);
 
+  // Persist user and token in localStorage
   useEffect(() => {
     if (user && token) {
       localStorage.setItem("user", JSON.stringify(user));
@@ -20,20 +21,34 @@ export const AuthProvider = ({ children }) => {
     }
   }, [user, token]);
 
-  const login = async (email, password) => {
+  // OTP login flow
+  const requestOtp = async (email, password) => {
     setLoading(true);
     try {
-      const res = await axios.post(`${API_BASE}/api/auth/login`, { email, password });
-      setUser(res.data.user);
-      setToken(res.data.token);
-      return { success: true };
+      const res = await axios.post(`${API_BASE}/api/auth/login/request-otp`, { email, password });
+      return { success: true, msg: res.data.msg };
     } catch (err) {
-      return { success: false, message: err.response?.data?.msg || "Login failed" };
+      return { success: false, message: err.response?.data?.msg || "OTP request failed" };
     } finally {
       setLoading(false);
     }
   };
 
+  const verifyOtp = async (email, otp) => {
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API_BASE}/api/auth/login/verify-otp`, { email, otp });
+      setUser(res.data.user);
+      setToken(res.data.token);
+      return { success: true };
+    } catch (err) {
+      return { success: false, message: err.response?.data?.msg || "OTP verification failed" };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Registration
   const register = async (name, email, password) => {
     setLoading(true);
     try {
@@ -48,6 +63,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Logout
   const logout = () => {
     setUser(null);
     setToken("");
@@ -55,11 +71,23 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
   };
 
-  const value = { user, token, login, register, logout, loading, isAuthenticated: !!token, setUser, setToken };
-
+  // Ensure Authorization header is set for all requests
   useEffect(() => {
     axios.defaults.headers.common["Authorization"] = token ? `Bearer ${token}` : "";
   }, [token]);
+
+  const value = {
+    user,
+    token,
+    requestOtp,    // Use this for OTP request
+    verifyOtp,     // Use this for OTP verification
+    register,
+    logout,
+    loading,
+    isAuthenticated: !!token,
+    setUser,
+    setToken,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
