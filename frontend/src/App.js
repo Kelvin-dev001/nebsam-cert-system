@@ -69,6 +69,14 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route
+  path="/certificates/:id/edit"
+  element={
+    <ProtectedRoute>
+      <CertificateEdit />
+    </ProtectedRoute>
+  }
+/>
           {/* Catch-all route */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>

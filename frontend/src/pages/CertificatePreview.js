@@ -178,12 +178,6 @@ const CertificatePreview = () => {
         <Typography>
           <b>Date of Issue:</b> {cert.dateOfIssue?.slice(0, 10)}
         </Typography>
-        <Typography>
-          <b>Approval Status:</b>{" "}
-          {cert.approved
-            ? `Approved at ${cert.approvedAt?.slice(0, 19).replace("T", " ")}`
-            : "Not Approved"}
-        </Typography>
       </Stack>
 
       {/* Edit & Print/Share Buttons */}

@@ -246,7 +246,7 @@ exports.shareCertificate = async (req, res) => {
     doc.text(`Issued To: ${cert.issuedTo}`);
     doc.text(`Date of Issue: ${cert.dateOfIssue?.toISOString().slice(0,10)}`);
     doc.text(`Approved: ${cert.approved ? 'Yes' : 'No'}`);
-    if (cert.approvedAt) doc.text(`Approved At: ${cert.approvedAt.toISOString().slice(0, 19).replace('T', ' ')}`);
+    //if (cert.approvedAt) doc.text(`Approved At: ${cert.approvedAt.toISOString().slice(0, 19).replace('T', ' ')}`);
 
     // *** REMOVED CREATED BY LINE ***
     // No doc.text for createdBy!
