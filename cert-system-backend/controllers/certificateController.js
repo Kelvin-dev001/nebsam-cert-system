@@ -70,12 +70,15 @@ exports.getCertificateById = async (req, res) => {
       console.warn(`[GET CERT BY ID] CertID: ${req.params.id} not found, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
       return res.status(404).json({ msg: 'Certificate not found' });
     }
+    // FIX: Compare both sides as strings to match ObjectId and string
     if (req.user.role !== "admin" && String(cert.createdBy) !== String(req.user.id)) {
+      console.warn(`[GET CERT BY ID UNAUTH] CertID: ${cert._id}, createdBy: ${cert.createdBy}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
       return res.status(403).json({ msg: "Not authorized" });
     }
+    console.log(`[GET CERT BY ID] CertID: ${cert._id}, createdBy: ${cert.createdBy}, UserID: ${req.user.id}, role: ${req.user.role}, Time: ${new Date().toISOString()}`);
     res.json(cert);
   } catch (err) {
-    console.error(`[GET CERT BY ID ERROR] CertID: ${req.params.id}, UserID: ${req.user.id}, Error: ${err.message}`);
+    console.error(`[GET CERT BY ID ERROR] CertID: ${req.params.id}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}, Error: ${err.message}`);
     res.status(500).json({ msg: 'Server error', error: err.message });
   }
 };
