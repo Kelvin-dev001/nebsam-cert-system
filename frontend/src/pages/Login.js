@@ -5,7 +5,6 @@ import { TextField, Button, Box, Typography, CircularProgress } from "@mui/mater
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
 
 const schema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email required"),
@@ -18,7 +17,6 @@ const otpSchema = Yup.object().shape({
     .length(6, "OTP must be 6 digits"),
 });
 
-// Correct API_BASE usage
 const API_BASE = process.env.REACT_APP_API_BASE;
 
 const Login = () => {
@@ -42,57 +40,44 @@ const Login = () => {
     formState: { errors: otpErrors },
   } = useForm({ resolver: yupResolver(otpSchema) });
 
+  // Auth context methods
+  const { requestOtp, verifyOtp } = useContext(AuthContext);
+
   // Step 1 handler: Request OTP
   const onSubmitLogin = async (data) => {
     setError('');
     setLoading(true);
     try {
       const normalizedEmail = data.email.trim().toLowerCase();
-      const res = await axios.post(`${API_BASE}/api/auth/login/request-otp`, {
-        email: normalizedEmail,
-        password: data.password,
-      });
-      if (res.data.success) {
+      const res = await requestOtp(normalizedEmail, data.password);
+      if (res.success) {
         setLoginData({ email: normalizedEmail, password: data.password });
         setStep(2);
       } else {
-        setError(res.data.msg || "Unknown error");
+        setError(res.message || "Unknown error");
       }
     } catch (err) {
-      setError(err.response?.data?.msg || "Login error");
+      setError("Login error");
     } finally {
       setLoading(false);
     }
   };
 
   // Step 2 handler: Verify OTP
-  const { setUser, setToken } = useContext(AuthContext);
   const onSubmitOtp = async (data) => {
     setError('');
     setLoading(true);
     try {
       const normalizedEmail = loginData.email.trim().toLowerCase();
       const normalizedOtp = String(data.otp).trim();
-      const res = await axios.post(`${API_BASE}/api/auth/login/verify-otp`, {
-        email: normalizedEmail,
-        otp: normalizedOtp,
-      });
-      if (res.data.token && res.data.user) {
-        setToken(res.data.token);
-        setUser(res.data.user);
+      const res = await verifyOtp(normalizedEmail, normalizedOtp);
+      if (res.success) {
         navigate("/dashboard");
       } else {
-        setError(res.data.msg || "Invalid OTP");
+        setError(res.message || "Invalid OTP");
       }
     } catch (err) {
-      console.log("OTP verification error response:", err.response?.data);
-      if (err.response?.data?.msg) {
-        setError(err.response.data.msg);
-      } else if (err.response?.data?.errors) {
-        setError(err.response.data.errors.map(e => e.msg).join(", "));
-      } else {
-        setError("OTP verification error");
-      }
+      setError("OTP verification error");
     } finally {
       setLoading(false);
     }
