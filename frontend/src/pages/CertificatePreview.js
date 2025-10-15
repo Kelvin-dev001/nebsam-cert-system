@@ -12,6 +12,8 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import CertificateDocument from "../components/CertificateDocument"; // Create this as shown previously
 
 const API_BASE = process.env.REACT_APP_API_BASE;
 
@@ -22,7 +24,6 @@ const CertificatePreview = () => {
 
   const [cert, setCert] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [shareLoading, setShareLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -39,46 +40,6 @@ const CertificatePreview = () => {
       .catch(() => setCert(null))
       .finally(() => setLoading(false));
   }, [id, token]);
-
-  // Print/Share Button Handler
-  const handleSharePrint = async () => {
-    setShareLoading(true);
-    try {
-      const response = await axios.post(
-        `${API_BASE}/api/certificates/${cert._id}/share`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "blob"
-        }
-      );
-      const url = window.URL.createObjectURL(
-        new Blob([response.data], { type: "application/pdf" })
-      );
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `certificate_${cert.certificateSerialNo}.pdf`
-      );
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      setSnackbar({
-        open: true,
-        message: "Certificate successfully downloaded!",
-        severity: "success"
-      });
-    } catch (err) {
-      const msg =
-        err.response?.data?.msg ||
-        "Share/Print error.";
-      setSnackbar({ open: true, message: msg, severity: "error" });
-    } finally {
-      setShareLoading(false);
-    }
-  };
 
   const handleSnackbarClose = () => {
     setSnackbar({ ...snackbar, open: false });
@@ -180,7 +141,7 @@ const CertificatePreview = () => {
         </Typography>
       </Stack>
 
-      {/* Edit & Print/Share Buttons */}
+      {/* Edit Button */}
       <Button
         variant="contained"
         sx={{ mt: 4, mr: 2 }}
@@ -188,14 +149,26 @@ const CertificatePreview = () => {
       >
         Edit
       </Button>
-      <Button
-        variant="contained"
-        sx={{ mt: 4, mr: 2 }}
-        onClick={handleSharePrint}
-        disabled={shareLoading}
+
+      {/* PDF Download Button */}
+      <PDFDownloadLink
+        document={<CertificateDocument cert={cert} />}
+        fileName={`certificate_${cert.certificateSerialNo}.pdf`}
+        style={{ textDecoration: "none", marginLeft: 8 }}
       >
-        {shareLoading ? <CircularProgress size={24} /> : "Print / Share"}
-      </Button>
+        {({ loading }) =>
+          loading ? (
+            <Button variant="contained" disabled sx={{ mt: 4 }}>
+              Preparing PDF...
+            </Button>
+          ) : (
+            <Button variant="contained" color="success" sx={{ mt: 4 }}>
+              Download Professional PDF
+            </Button>
+          )
+        }
+      </PDFDownloadLink>
+
       <Button variant="outlined" sx={{ mt: 4 }} onClick={() => navigate(-1)}>
         Back
       </Button>
