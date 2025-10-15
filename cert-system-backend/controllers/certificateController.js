@@ -9,9 +9,7 @@ async function generateSerialNo() {
   return `NDS-${(count + 1).toString().padStart(5, '0')}`;
 }
 
-// In-memory OTP store for approvals. Use Redis/DB in production.
-const approvalOtpStore = {}; // { certId: { otp: '123456', expires: timestamp } }
-const OTP_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
+// --- Removed approval OTP logic and approval checks ---
 
 exports.createCertificate = async (req, res) => {
   const errors = validationResult(req);
@@ -70,7 +68,6 @@ exports.getCertificateById = async (req, res) => {
       console.warn(`[GET CERT BY ID] CertID: ${req.params.id} not found, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
       return res.status(404).json({ msg: 'Certificate not found' });
     }
-    // FIX: Compare both sides as strings to match ObjectId and string
     if (req.user.role !== "admin" && String(cert.createdBy) !== String(req.user.id)) {
       console.warn(`[GET CERT BY ID UNAUTH] CertID: ${cert._id}, createdBy: ${cert.createdBy}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
       return res.status(403).json({ msg: "Not authorized" });
@@ -136,82 +133,9 @@ exports.whatsappCertificate = async (req, res) => {
   res.json({ msg: "Certificate shared via WhatsApp (stub implementation)" });
 };
 
-// Approve certificate: send OTP to admin numbers
-exports.sendApprovalOtp = async (req, res) => {
-  try {
-    const cert = await Certificate.findById(req.params.id);
-    if (!cert) {
-      console.warn(`[APPROVAL OTP] CertID: ${req.params.id} not found, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
-      return res.status(404).json({ msg: "Certificate not found" });
-    }
-    if (cert.approved) {
-      console.warn(`[APPROVAL OTP] CertID: ${cert._id} already approved, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
-      return res.status(400).json({ msg: "Already approved." });
-    }
+// --- REMOVED approval OTP routes and logic ---
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    approvalOtpStore[cert._id] = {
-      otp,
-      expires: Date.now() + OTP_EXPIRY_MS
-    };
-
-    const smsResult = await sendOtpSms(otp);
-    if (!smsResult) {
-      console.error(`[APPROVAL OTP ERROR] CertID: ${cert._id}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}, SMS sending failed`);
-      return res.status(500).json({ msg: "OTP SMS failed" });
-    }
-
-    console.log(`[APPROVAL OTP] CertID: ${cert._id}, OTP: ${otp}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
-    return res.json({ success: true, msg: "Approval OTP sent to admin numbers." });
-  } catch (err) {
-    console.error(`[APPROVAL OTP ERROR] CertID: ${req.params.id}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}, Error: ${err.message}`);
-    res.status(500).json({ msg: "Server error", error: err.message });
-  }
-};
-
-// Verify OTP and mark as approved
-exports.verifyApprovalOtp = async (req, res) => {
-  const { otp } = req.body;
-  try {
-    const cert = await Certificate.findById(req.params.id);
-    if (!cert) {
-      console.warn(`[VERIFY OTP] CertID: ${req.params.id} not found, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
-      return res.status(404).json({ msg: "Certificate not found" });
-    }
-    if (cert.approved) {
-      console.warn(`[VERIFY OTP] CertID: ${cert._id} already approved, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
-      return res.status(400).json({ msg: "Already approved." });
-    }
-
-    const store = approvalOtpStore[cert._id];
-    if (!store) {
-      console.warn(`[VERIFY OTP] No OTP sent for CertID: ${cert._id}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
-      return res.status(400).json({ msg: "No OTP sent. Please request approval." });
-    }
-    if (Date.now() > store.expires) {
-      delete approvalOtpStore[cert._id];
-      console.warn(`[VERIFY OTP] OTP expired for CertID: ${cert._id}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
-      return res.status(400).json({ msg: "OTP expired. Please request again." });
-    }
-    if (otp !== store.otp) {
-      console.warn(`[VERIFY OTP] Invalid OTP for CertID: ${cert._id}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
-      return res.status(400).json({ msg: "Invalid OTP." });
-    }
-
-    cert.approved = true;
-    cert.approvedAt = new Date();
-    await cert.save();
-    delete approvalOtpStore[cert._id];
-
-    console.log(`[VERIFY OTP SUCCESS] CertID: ${cert._id}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
-    res.json({ success: true, msg: "Certificate approved.", cert });
-  } catch (err) {
-    console.error(`[VERIFY OTP ERROR] CertID: ${req.params.id}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}, Error: ${err.message}`);
-    res.status(500).json({ msg: "Server error", error: err.message });
-  }
-};
-
-// Share/Print: only allowed if approved
+// Share/Print: no approval required
 exports.shareCertificate = async (req, res) => {
   try {
     const cert = await Certificate.findById(req.params.id);
@@ -222,10 +146,6 @@ exports.shareCertificate = async (req, res) => {
     if (req.user.role !== "admin" && String(cert.createdBy) !== req.user.id) {
       console.warn(`[CERT PRINT UNAUTH] CertID: ${cert._id}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
       return res.status(403).json({ msg: "Not authorized" });
-    }
-    if (!cert.approved) {
-      console.warn(`[CERT PRINT] CertID: ${cert._id} not approved, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
-      return res.status(403).json({ msg: "Certificate not approved. Please complete approval before printing." });
     }
 
     const doc = new PDFDocument();
@@ -245,11 +165,8 @@ exports.shareCertificate = async (req, res) => {
     doc.text(`Certificate Serial No: ${cert.certificateSerialNo}`);
     doc.text(`Issued To: ${cert.issuedTo}`);
     doc.text(`Date of Issue: ${cert.dateOfIssue?.toISOString().slice(0,10)}`);
-    //doc.text(`Approved: ${cert.approved ? 'Yes' : 'No'}`);
-    //if (cert.approvedAt) doc.text(`Approved At: ${cert.approvedAt.toISOString().slice(0, 19).replace('T', ' ')}`);
 
-    // *** REMOVED CREATED BY LINE ***
-    // No doc.text for createdBy!
+    // *** REMOVED Approval Status and Created By ***
 
     if (cert.type === "tracking") {
       doc.moveDown();
@@ -281,15 +198,16 @@ exports.shareCertificate = async (req, res) => {
     res.status(500).json({ msg: "Server error", error: err.message });
   }
 };
+
+// --- Approval endpoints removed ---
+
 // POST /api/auth/register
 exports.register = async (req, res) => {
-  // Implement registration logic here, or placeholder:
   return res.status(501).json({ msg: 'Not implemented' });
 };
 
 // POST /api/auth/login
 exports.login = async (req, res) => {
-  // Implement legacy login logic here, or placeholder:
   return res.status(501).json({ msg: 'Not implemented' });
 };
 // POST /api/auth/register
