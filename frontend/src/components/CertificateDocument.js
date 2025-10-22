@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   value: {
-    fontSize: 9,
+    fontSize: 10,
     color: "#222",
     fontFamily: "Roboto",
     marginBottom: 0,
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   },
   fittedBy: {
     marginTop: 7,
-    fontSize: 8,
+    fontSize: 10,
     fontFamily: "Roboto",
     fontWeight: "bold",
     color: "#333",
