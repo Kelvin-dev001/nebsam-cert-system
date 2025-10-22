@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     height: "100%",
     left: 0,
     top: 0,
-    opacity: 0.16,
+    opacity: 0.19, // More visible
     zIndex: 0,
     flexDirection: "column",
     justifyContent: "space-between",
@@ -51,42 +51,52 @@ const styles = StyleSheet.create({
   watermarkRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    // More vertical spacing between rows to avoid overlap
+    marginBottom: 9,
     marginLeft: 0,
     marginRight: 0,
   },
   watermarkText: {
-    fontSize: 7,
+    fontSize: 11, // Larger and more readable
     color: DARK_BLUE,
     fontFamily: "Lora-Bold",
-    marginRight: 1,
-    marginBottom: 1,
     fontWeight: "bold",
     transform: "rotate(-30deg)",
-    letterSpacing: 0.5,
+    letterSpacing: 1,
+    marginRight: 8,
+    marginBottom: 0,
+  },
+  certificateTitle: {
+    fontSize: 18, // Increased font size
+    fontFamily: "Lora-Bold",
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: 32,
+    marginBottom: 12,
+    textDecoration: "underline",
+    color: DARK_BLUE,
+    width: "92%",
+    alignSelf: "center",
+  },
+  logoRow: {
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  logo: {
+    width: 46, // 20% bigger than previous size
+    height: 46,
+    marginTop: 0,
+    marginBottom: 3,
+    alignSelf: "center",
   },
   header: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginTop: 10,
-    marginBottom: 3,
     zIndex: 2,
     width: "92%",
     alignSelf: "center",
-  },
-  logo: {
-    width: 38,
-    height: 38,
-    marginTop: 8,
-    marginBottom: 2,
-    marginRight: 8,
-    alignSelf: "center",
-  },
-  qrImage: {
-    width: 34,
-    height: 34,
-    marginTop: 3,
-    marginLeft: "auto",
-    alignSelf: "flex-start",
+    marginBottom: 3,
+    justifyContent: "space-between",
   },
   headerTextBlock: {
     flexGrow: 1,
@@ -111,16 +121,12 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 1,
   },
-  certificateTitle: {
-    fontSize: 10,
-    fontFamily: "Lora",
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 5,
-    textDecoration: "underline",
-    color: DARK_BLUE,
-    width: "92%",
-    alignSelf: "center",
+  qrImage: {
+    width: 34,
+    height: 34,
+    marginTop: 2,
+    marginLeft: "auto",
+    alignSelf: "flex-start",
   },
   section: {
     borderRadius: 5,
@@ -132,7 +138,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   sectionTitle: {
-    fontSize: 8.7,
+    fontSize: 10,
     fontFamily: "Lora",
     fontWeight: "bold",
     color: DARK_BLUE,
@@ -145,14 +151,14 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: "bold",
-    fontSize: 8,
+    fontSize: 9,
     color: DARK_BLUE,
     fontFamily: "Lora-Bold",
     marginBottom: 0,
     letterSpacing: 0.5,
   },
   value: {
-    fontSize: 9,
+    fontSize: 10,
     color: "#222",
     fontFamily: "Roboto",
     marginBottom: 0,
@@ -190,8 +196,9 @@ const styles = StyleSheet.create({
 const format = d => (d ? d.slice(0, 10) : "");
 
 const CertificateDocument = ({ cert = {}, qr = null }) => {
-  const watermarkRowsCount = 72;
-  const watermarkColsCount = 26;
+  // Fewer rows/columns, more space between watermarks
+  const watermarkRowsCount = 32;
+  const watermarkColsCount = 12;
   const watermarkRowText = Array(watermarkColsCount).fill("Nebsam Digital Solutions");
 
   return (
@@ -200,7 +207,7 @@ const CertificateDocument = ({ cert = {}, qr = null }) => {
         {/* Border */}
         <View style={styles.pageBorder} fixed />
 
-        {/* Watermark grid */}
+        {/* Watermark grid - less overlap, more readable */}
         <View style={styles.watermarkGrid} fixed>
           {Array(watermarkRowsCount).fill(0).map((_, rowIdx) => (
             <View style={styles.watermarkRow} key={rowIdx}>
@@ -217,12 +224,12 @@ const CertificateDocument = ({ cert = {}, qr = null }) => {
         <Text style={styles.certificateTitle}>Certificate of Installation</Text>
 
         {/* Logo below certificate title */}
-        <View style={{ alignItems: "center", marginBottom: 4 }}>
+        <View style={styles.logoRow}>
           <Image src="/logo.png" style={styles.logo} />
         </View>
 
         {/* Header: text block center, qr (right) */}
-        <View style={{ ...styles.header, justifyContent: "space-between" }}>
+        <View style={styles.header}>
           <View style={styles.headerTextBlock}>
             <Text style={styles.companyName}>Nebsam Digital Solutions (K) Ltd</Text>
             <Text style={styles.companyContact}>
