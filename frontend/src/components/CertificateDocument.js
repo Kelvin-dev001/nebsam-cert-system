@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 0,
     fontFamily: "Roboto",
-    fontSize: 10,
+    fontSize: 11,
     color: "#222",
     position: "relative",
     minHeight: "100%",
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     height: "100%",
     left: 0,
     top: 0,
-    opacity: 0.10,
+    opacity: 0.11,
     zIndex: 0,
     flexDirection: "column",
     justifyContent: "space-between",
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     marginTop: 18,
-    marginBottom: 10,
+    marginBottom: 8,
     zIndex: 2,
   },
   logo: {
@@ -95,17 +95,17 @@ const styles = StyleSheet.create({
     fontFamily: "Lora",
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 10,
     textDecoration: "underline",
     color: "#0a4b7a",
   },
   section: {
     borderRadius: 9,
     border: "1pt solid #c7d7eb",
-    padding: 9,
-    marginBottom: 7,
+    padding: 14,
+    marginBottom: 14,
     backgroundColor: "#f7fbff",
-    width: "90%",
+    width: "91%",
     alignSelf: "center",
   },
   sectionTitle: {
@@ -113,33 +113,25 @@ const styles = StyleSheet.create({
     fontFamily: "Lora",
     fontWeight: "bold",
     color: "#0a4b7a",
-    marginBottom: 3,
+    marginBottom: 8,
     textAlign: "center",
+    letterSpacing: 0.5,
   },
-  detailsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-    marginBottom: 3,
-    flexWrap: "wrap",
-  },
-  fieldBlock: {
-    flex: 1,
-    minWidth: 95,
-    maxWidth: 140,
-    marginRight: 10,
+  fieldRow: {
+    marginBottom: 14,
   },
   label: {
     fontWeight: "bold",
-    fontSize: 9,
-    color: "#222",
-    fontFamily: "Roboto",
-    marginBottom: 1,
-  },
-  value: {
     fontSize: 11,
     color: "#0a4b7a",
     fontFamily: "Lora-Bold",
+    marginBottom: 1,
+    letterSpacing: 0.5,
+  },
+  value: {
+    fontSize: 13,
+    color: "#222",
+    fontFamily: "Roboto",
     marginBottom: 0,
     fontWeight: "bold",
     letterSpacing: 0.1,
@@ -149,14 +141,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomStyle: "dashed",
     borderBottomColor: "#0a4b7a",
-    marginTop: -2,
-    marginBottom: 4,
+    marginTop: 3,
+    marginBottom: 2,
     width: "100%",
   },
   qrAndSealRow: {
     flexDirection: "row",
     justifyContent: "flex-start",
-    marginTop: 6,
+    marginTop: 18,
     alignItems: "center",
     gap: 10,
   },
@@ -172,18 +164,18 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   fittedBy: {
-    marginTop: 15,
-    fontSize: 10,
+    marginTop: 20,
+    fontSize: 12,
     fontFamily: "Roboto",
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 5,
+    marginBottom: 7,
   },
   finePrint: {
-    fontSize: 8,
+    fontSize: 9,
     textAlign: "center",
     color: "#777",
-    marginTop: 2,
+    marginTop: 15,
     fontFamily: "Roboto",
     marginBottom: 2,
     alignSelf: "center",
@@ -228,103 +220,91 @@ const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" 
         {/* Certificate Details */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Certificate Details</Text>
-          <View style={styles.detailsRow}>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>Type:</Text>
-              <Text style={styles.value}>{cert.type === "tracking" ? "Vehicle Tracking Installation" : "Radio Call Ownership"}</Text>
-              <View style={styles.dottedLine} />
-            </View>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>Serial No:</Text>
-              <Text style={styles.value}>{cert.certificateSerialNo || ""}</Text>
-              <View style={styles.dottedLine} />
-            </View>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>Date of Issue:</Text>
-              <Text style={styles.value}>{format(cert.dateOfIssue)}</Text>
-              <View style={styles.dottedLine} />
-            </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>Type:</Text>
+            <Text style={styles.value}>{cert.type === "tracking" ? "Vehicle Tracking Installation" : "Radio Call Ownership"}</Text>
+            <View style={styles.dottedLine} />
+          </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>Serial No:</Text>
+            <Text style={styles.value}>{cert.certificateSerialNo || ""}</Text>
+            <View style={styles.dottedLine} />
+          </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>Date of Issue:</Text>
+            <Text style={styles.value}>{format(cert.dateOfIssue)}</Text>
+            <View style={styles.dottedLine} />
           </View>
         </View>
         {/* Owner Details */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Owner Details</Text>
-          <View style={styles.detailsRow}>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>Issued To:</Text>
-              <Text style={styles.value}>{cert.issuedTo || ""}</Text>
-              <View style={styles.dottedLine} />
-            </View>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>ID Number:</Text>
-              <Text style={styles.value}>{cert.idNumber || ""}</Text>
-              <View style={styles.dottedLine} />
-            </View>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>Phone Number:</Text>
-              <Text style={styles.value}>{cert.phoneNumber || ""}</Text>
-              <View style={styles.dottedLine} />
-            </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>Issued To:</Text>
+            <Text style={styles.value}>{cert.issuedTo || ""}</Text>
+            <View style={styles.dottedLine} />
+          </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>ID Number:</Text>
+            <Text style={styles.value}>{cert.idNumber || ""}</Text>
+            <View style={styles.dottedLine} />
+          </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>Phone Number:</Text>
+            <Text style={styles.value}>{cert.phoneNumber || ""}</Text>
+            <View style={styles.dottedLine} />
           </View>
         </View>
         {/* Vehicle Details */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Vehicle Details</Text>
-          <View style={styles.detailsRow}>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>Registration No:</Text>
-              <Text style={styles.value}>{cert.vehicleRegNumber || ""}</Text>
-              <View style={styles.dottedLine} />
-            </View>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>Make:</Text>
-              <Text style={styles.value}>{cert.make || ""}</Text>
-              <View style={styles.dottedLine} />
-            </View>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>Body Type:</Text>
-              <Text style={styles.value}>{cert.bodyType || ""}</Text>
-              <View style={styles.dottedLine} />
-            </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>Registration No:</Text>
+            <Text style={styles.value}>{cert.vehicleRegNumber || ""}</Text>
+            <View style={styles.dottedLine} />
+          </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>Make:</Text>
+            <Text style={styles.value}>{cert.make || ""}</Text>
+            <View style={styles.dottedLine} />
+          </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>Body Type:</Text>
+            <Text style={styles.value}>{cert.bodyType || ""}</Text>
+            <View style={styles.dottedLine} />
           </View>
         </View>
         {/* Device Details */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Device Details</Text>
-          <View style={styles.detailsRow}>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>Device Fitted With:</Text>
-              <Text style={styles.value}>{cert.deviceFittedWith || ""}</Text>
-              <View style={styles.dottedLine} />
-            </View>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>IMEI No:</Text>
-              <Text style={styles.value}>{cert.imeiNo || ""}</Text>
-              <View style={styles.dottedLine} />
-            </View>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>SIM No:</Text>
-              <Text style={styles.value}>{cert.simNo || ""}</Text>
-              <View style={styles.dottedLine} />
-            </View>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>Installation Date:</Text>
-              <Text style={styles.value}>{format(cert.dateOfInstallation)}</Text>
-              <View style={styles.dottedLine} />
-            </View>
-            <View style={styles.fieldBlock}>
-              <Text style={styles.label}>Expiry Date:</Text>
-              <Text style={styles.value}>{format(cert.expiryDate)}</Text>
-              <View style={styles.dottedLine} />
-            </View>
-            {qr && (
-              <View style={{ alignItems: "center", marginLeft: 10 }}>
-                <Image src={qr} style={styles.qrImage} />
-              </View>
-            )}
-            <View style={{ alignItems: "center", marginLeft: 10 }}>
-              <Image src={signatureUrl} style={styles.sealImage} />
-            </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>Device Fitted With:</Text>
+            <Text style={styles.value}>{cert.deviceFittedWith || ""}</Text>
+            <View style={styles.dottedLine} />
+          </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>IMEI No:</Text>
+            <Text style={styles.value}>{cert.imeiNo || ""}</Text>
+            <View style={styles.dottedLine} />
+          </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>SIM No:</Text>
+            <Text style={styles.value}>{cert.simNo || ""}</Text>
+            <View style={styles.dottedLine} />
+          </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>Installation Date:</Text>
+            <Text style={styles.value}>{format(cert.dateOfInstallation)}</Text>
+            <View style={styles.dottedLine} />
+          </View>
+          <View style={styles.fieldRow}>
+            <Text style={styles.label}>Expiry Date:</Text>
+            <Text style={styles.value}>{format(cert.expiryDate)}</Text>
+            <View style={styles.dottedLine} />
+          </View>
+          <View style={styles.qrAndSealRow}>
+            {qr && <Image src={qr} style={styles.qrImage} />}
+            <Image src={signatureUrl} style={styles.sealImage} />
           </View>
           <Text style={styles.fittedBy}>Fitted By: Dennis Karani</Text>
         </View>
