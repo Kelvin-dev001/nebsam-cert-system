@@ -76,8 +76,10 @@ const styles = StyleSheet.create({
   logo: {
     width: 38,
     height: 38,
+    marginTop: 8,
     marginBottom: 2,
     marginRight: 8,
+    alignSelf: "center",
   },
   qrImage: {
     width: 34,
@@ -117,6 +119,8 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     textDecoration: "underline",
     color: DARK_BLUE,
+    width: "92%",
+    alignSelf: "center",
   },
   section: {
     borderRadius: 5,
@@ -148,7 +152,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   value: {
-    fontSize: 10,
+    fontSize: 9,
     color: "#222",
     fontFamily: "Roboto",
     marginBottom: 0,
@@ -166,7 +170,7 @@ const styles = StyleSheet.create({
   },
   fittedBy: {
     marginTop: 7,
-    fontSize: 10,
+    fontSize: 8,
     fontFamily: "Roboto",
     fontWeight: "bold",
     color: "#333",
@@ -209,15 +213,21 @@ const CertificateDocument = ({ cert = {}, qr = null }) => {
           ))}
         </View>
 
-        {/* Header: logo (left), text (center), qr (right) */}
-        <View style={styles.header}>
+        {/* Certificate Title */}
+        <Text style={styles.certificateTitle}>Certificate of Installation</Text>
+
+        {/* Logo below certificate title */}
+        <View style={{ alignItems: "center", marginBottom: 4 }}>
           <Image src="/logo.png" style={styles.logo} />
+        </View>
+
+        {/* Header: text block center, qr (right) */}
+        <View style={{ ...styles.header, justifyContent: "space-between" }}>
           <View style={styles.headerTextBlock}>
             <Text style={styles.companyName}>Nebsam Digital Solutions (K) Ltd</Text>
             <Text style={styles.companyContact}>
               P.O Box: 82436-80100, Mombasa, Kenya · Tel: 0759000111 · info@nebsamdigital.com
             </Text>
-            <Text style={styles.certificateTitle}>Certificate of Installation</Text>
           </View>
           {qr && <Image src={qr} style={styles.qrImage} />}
         </View>
