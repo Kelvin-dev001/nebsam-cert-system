@@ -17,24 +17,24 @@ Font.register({ family: "Roboto", src: "/fonts/Roboto-Regular.ttf" });
 const styles = StyleSheet.create({
   page: {
     backgroundColor: "#fff",
-    padding: 18,
+    padding: 10,
     fontFamily: "Roboto",
     position: "relative",
-    fontSize: 9.2,
+    fontSize: 8,
     color: "#222",
     minHeight: "100%",
   },
   pageBorder: {
     position: "absolute",
-    top: 6,
-    left: 6,
-    right: 6,
-    bottom: 6,
+    top: 3,
+    left: 3,
+    right: 3,
+    bottom: 3,
     border: "2pt solid #0a4b7a",
-    borderRadius: 12,
+    borderRadius: 8,
     zIndex: 99,
   },
-  // Watermark grid, denser and smaller
+  // Watermark grid, super-dense and tiny
   watermarkGrid: {
     position: "absolute",
     width: "100%",
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     zIndex: 0,
     left: 0,
     top: 0,
-    opacity: 0.12,
+    opacity: 0.10,
     flexDirection: "column",
     justifyContent: "space-between",
     pointerEvents: "none",
@@ -54,27 +54,27 @@ const styles = StyleSheet.create({
     marginRight: 0,
   },
   watermarkText: {
-    fontSize: 6,
+    fontSize: 4,
     color: "#0a4b7a",
     fontFamily: "Lora",
-    marginRight: 2,
-    marginBottom: 2,
+    marginRight: 1,
+    marginBottom: 1,
     fontWeight: "bold",
     transform: "rotate(-30deg)",
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
   header: {
     alignItems: "center",
-    marginBottom: 3,
+    marginBottom: 2,
     zIndex: 2,
   },
   logo: {
-    width: 70,
+    width: 50,
     height: "auto",
-    marginBottom: 2,
+    marginBottom: 1,
   },
   companyName: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: "Lora-Bold",
     fontWeight: "bold",
     textAlign: "center",
@@ -82,60 +82,59 @@ const styles = StyleSheet.create({
     marginBottom: 1,
   },
   companyContact: {
-    fontSize: 8,
+    fontSize: 7,
     fontFamily: "Roboto",
     fontWeight: "bold",
     textAlign: "center",
     color: "#333",
-    marginBottom: 2,
+    marginBottom: 1,
   },
   certificateTitle: {
-    fontSize: 11,
+    fontSize: 9,
     fontFamily: "Lora",
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 5,
+    marginBottom: 3,
     textDecoration: "underline",
     color: "#0a4b7a",
   },
-  // Section styles
   section: {
-    borderRadius: 6,
-    padding: 4,
-    marginBottom: 4,
+    borderRadius: 4,
+    padding: 2,
+    marginBottom: 2,
     backgroundColor: "#f5f9ff",
     border: "1pt solid #eee",
   },
   sectionTitle: {
-    fontSize: 8.5,
+    fontSize: 7.5,
     fontFamily: "Lora",
     fontWeight: "bold",
     color: "#0a4b7a",
-    marginBottom: 2,
+    marginBottom: 1,
     textAlign: "center",
   },
-  // Horizontal grid for section fields
   row: {
     flexDirection: "row",
     alignItems: "flex-end",
-    marginBottom: 2,
-    gap: 2,
+    marginBottom: 1,
+    flexWrap: "wrap",
+    gap: 1,
   },
   fieldBlock: {
     flex: 1,
-    marginRight: 2,
-    minWidth: 68,
-    maxWidth: 100,
+    marginRight: 1,
+    minWidth: 50,
+    maxWidth: 80,
   },
   label: {
     fontWeight: "bold",
-    fontSize: 7.5,
+    fontSize: 6.5,
     color: "#333",
     fontFamily: "Roboto",
     marginBottom: 0,
   },
   value: {
-    fontSize: 8.5,
+    fontSize: 7.5,
     color: "#0a4b7a",
     fontFamily: "Lora-Bold",
     marginBottom: 0,
@@ -144,49 +143,58 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   dottedLine: {
-    borderBottom: "0.8pt dotted #0a4b7a",
+    borderBottomWidth: 0.7,
+    borderBottomStyle: "dotted",
+    borderBottomColor: "#0a4b7a",
     marginTop: -2,
-    marginBottom: 2,
+    marginBottom: 1,
     width: "100%",
+  },
+  dottedText: {
+    fontSize: 6,
+    color: "#0a4b7a",
+    fontFamily: "Roboto",
+    marginTop: -2,
+    marginBottom: 1,
   },
   qrAndSealRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 4,
+    marginTop: 2,
     alignItems: "center",
   },
   qrImage: {
-    width: 43,
-    height: 43,
+    width: 32,
+    height: 32,
   },
   sealImage: {
-    width: 70,
-    height: 26,
+    width: 50,
+    height: 18,
     objectFit: "contain",
   },
   fittedBy: {
     marginTop: 1,
-    fontSize: 8,
+    fontSize: 7,
     fontFamily: "Roboto",
     fontWeight: "bold",
     color: "#333",
   },
   finePrint: {
-    fontSize: 7,
+    fontSize: 6,
     textAlign: "center",
     color: "#777",
-    marginTop: 3,
+    marginTop: 2,
     fontFamily: "Roboto",
-    marginBottom: 2,
+    marginBottom: 1,
   },
 });
 
 const format = d => (d ? d.slice(0, 10) : "");
 
 const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" }) => {
-  // Watermark grid: fill page with rows of watermarks, dense
-  const watermarkRowsCount = 45; // denser
-  const watermarkColsCount = 12; // denser
+  // Dense watermark grid for "no white space"
+  const watermarkRowsCount = 70; // more rows = denser
+  const watermarkColsCount = 22; // more cols = denser
   const watermarkRowText = Array(watermarkColsCount).fill("Nebsam Digital Solutions");
 
   return (
@@ -195,7 +203,7 @@ const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" 
         {/* Overall page border */}
         <View style={styles.pageBorder} fixed />
 
-        {/* Watermark grid (fills entire background) */}
+        {/* Watermark grid */}
         <View style={styles.watermarkGrid} fixed>
           {Array(watermarkRowsCount).fill(0).map((_, rowIdx) => (
             <View style={styles.watermarkRow} key={rowIdx}>
@@ -208,7 +216,7 @@ const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" 
           ))}
         </View>
 
-        {/* Certificate content (above watermark, inside border) */}
+        {/* Header */}
         <View style={styles.header}>
           <Image src="/logo.png" style={styles.logo} />
           <Text style={styles.companyName}>Nebsam Digital Solutions (K) Ltd</Text>
@@ -225,6 +233,7 @@ const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" 
             <View style={styles.fieldBlock}>
               <Text style={styles.label}>Type:</Text>
               <Text style={styles.value}>{cert.type === "tracking" ? "Vehicle Tracking Installation" : "Radio Call Ownership"}</Text>
+              {/* Use @react-pdf/renderer dotted line, fallback to dots if not supported */}
               <View style={styles.dottedLine} />
             </View>
             <View style={styles.fieldBlock}>
@@ -316,7 +325,7 @@ const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" 
           </View>
           {/* QR/Seal row (squeezed to fit) */}
           <View style={styles.qrAndSealRow}>
-            {qr ? <Image src={qr} style={styles.qrImage} /> : <View style={{ width: 43 }} />}
+            {qr ? <Image src={qr} style={styles.qrImage} /> : <View style={{ width: 32 }} />}
             <Image src={signatureUrl} style={styles.sealImage} />
           </View>
           <Text style={styles.fittedBy}>Fitted By: Dennis Karani</Text>
