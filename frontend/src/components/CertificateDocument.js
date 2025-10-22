@@ -14,12 +14,14 @@ Font.register({ family: "Lora", src: "/fonts/Lora-Regular.ttf" });
 Font.register({ family: "Lora-Bold", src: "/fonts/Lora-Bold.ttf" });
 Font.register({ family: "Roboto", src: "/fonts/Roboto-Regular.ttf" });
 
+const DARK_BLUE = "#003366";
+
 const styles = StyleSheet.create({
   page: {
     backgroundColor: "#fff",
     padding: 0,
     fontFamily: "Roboto",
-    fontSize: 9,
+    fontSize: 11,
     color: "#222",
     position: "relative",
     minHeight: "100%",
@@ -30,8 +32,8 @@ const styles = StyleSheet.create({
     left: 4,
     right: 4,
     bottom: 4,
-    border: "1.6pt solid #0a4b7a",
-    borderRadius: 10,
+    border: `2pt solid ${DARK_BLUE}`,
+    borderRadius: 12,
     zIndex: 100,
   },
   watermarkGrid: {
@@ -40,7 +42,7 @@ const styles = StyleSheet.create({
     height: "100%",
     left: 0,
     top: 0,
-    opacity: 0.09,
+    opacity: 0.18, // Increased visibility
     zIndex: 0,
     flexDirection: "column",
     justifyContent: "space-between",
@@ -53,83 +55,99 @@ const styles = StyleSheet.create({
     marginRight: 0,
   },
   watermarkText: {
-    fontSize: 5,
-    color: "#0a4b7a",
-    fontFamily: "Lora",
-    marginRight: 1,
-    marginBottom: 1,
+    fontSize: 8, // Slightly bigger for readability
+    color: DARK_BLUE,
+    fontFamily: "Lora-Bold",
+    marginRight: 2,
+    marginBottom: 2,
     fontWeight: "bold",
     transform: "rotate(-30deg)",
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
   header: {
     alignItems: "center",
-    marginTop: 10,
-    marginBottom: 5,
+    marginTop: 18,
+    marginBottom: 8,
     zIndex: 2,
-  },
-  logo: {
-    width: 44,
-    height: 44,
-    marginBottom: 2,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "91%",
     alignSelf: "center",
   },
+  logo: {
+    width: 60,
+    height: 60,
+    marginBottom: 2,
+    alignSelf: "flex-start",
+  },
+  qrImage: {
+    width: 52,
+    height: 52,
+    marginTop: 7,
+    marginRight: 7,
+    alignSelf: "flex-end",
+  },
+  headerTextBlock: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   companyName: {
-    fontSize: 11,
+    fontSize: 15,
     fontFamily: "Lora-Bold",
     fontWeight: "bold",
     textAlign: "center",
-    color: "#0a4b7a",
+    color: DARK_BLUE,
     marginBottom: 1,
   },
   companyContact: {
-    fontSize: 7,
+    fontSize: 9,
     fontFamily: "Roboto",
     fontWeight: "bold",
     textAlign: "center",
     color: "#333",
-    marginBottom: 1,
+    marginBottom: 2,
   },
   certificateTitle: {
-    fontSize: 10,
+    fontSize: 13,
     fontFamily: "Lora",
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 7,
+    marginBottom: 10,
     textDecoration: "underline",
-    color: "#0a4b7a",
+    color: DARK_BLUE,
   },
   section: {
-    borderRadius: 7,
-    border: "1pt solid #c7d7eb",
-    padding: 7,
-    marginBottom: 7,
+    borderRadius: 9,
+    border: `1pt solid #c7d7eb`,
+    padding: 14,
+    marginBottom: 14,
     backgroundColor: "#f7fbff",
-    width: "90%",
+    width: "91%",
     alignSelf: "center",
   },
   sectionTitle: {
-    fontSize: 9.3,
+    fontSize: 11,
     fontFamily: "Lora",
     fontWeight: "bold",
-    color: "#0a4b7a",
-    marginBottom: 7,
+    color: DARK_BLUE,
+    marginBottom: 8,
     textAlign: "center",
     letterSpacing: 0.5,
   },
   fieldRow: {
-    marginBottom: 9,
+    marginBottom: 14,
   },
   label: {
     fontWeight: "bold",
-    fontSize: 9,
-    color: "#0a4b7a",
+    fontSize: 11,
+    color: DARK_BLUE,
     fontFamily: "Lora-Bold",
     marginBottom: 1,
     letterSpacing: 0.5,
   },
   value: {
-    fontSize: 10,
+    fontSize: 13,
     color: "#222",
     fontFamily: "Roboto",
     marginBottom: 0,
@@ -138,46 +156,35 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   dottedLine: {
-    borderBottomWidth: 0.8,
+    borderBottomWidth: 1,
     borderBottomStyle: "dashed",
-    borderBottomColor: "#0a4b7a",
-    marginTop: 2,
-    marginBottom: 1,
+    borderBottomColor: DARK_BLUE,
+    marginTop: 3,
+    marginBottom: 2,
     width: "100%",
   },
-  qrAndSealRow: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    marginTop: 12,
-    alignItems: "center",
-    gap: 8,
-  },
-  qrImage: {
-    width: 32,
-    height: 32,
-    marginRight: 6,
-  },
   sealImage: {
-    width: 40,
-    height: 15,
+    width: 60,
+    height: 20,
     objectFit: "contain",
-    marginLeft: 8,
+    marginLeft: 10,
+    marginTop: 10,
   },
   fittedBy: {
-    marginTop: 10,
-    fontSize: 8.5,
+    marginTop: 20,
+    fontSize: 12,
     fontFamily: "Roboto",
     fontWeight: "bold",
     color: "#333",
-    marginBottom: 5,
+    marginBottom: 7,
   },
   finePrint: {
-    fontSize: 7,
+    fontSize: 9,
     textAlign: "center",
     color: "#777",
-    marginTop: 12,
+    marginTop: 15,
     fontFamily: "Roboto",
-    marginBottom: 1,
+    marginBottom: 2,
     alignSelf: "center",
   },
 });
@@ -185,8 +192,8 @@ const styles = StyleSheet.create({
 const format = d => (d ? d.slice(0, 10) : "");
 
 const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" }) => {
-  const watermarkRowsCount = 70;
-  const watermarkColsCount = 24;
+  const watermarkRowsCount = 60;
+  const watermarkColsCount = 18;
   const watermarkRowText = Array(watermarkColsCount).fill("Nebsam Digital Solutions");
 
   return (
@@ -208,13 +215,17 @@ const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" 
           ))}
         </View>
 
+        {/* Header with logo (left), QR (right), and text (center) */}
         <View style={styles.header}>
           <Image src="/logo.png" style={styles.logo} />
-          <Text style={styles.companyName}>Nebsam Digital Solutions (K) Ltd</Text>
-          <Text style={styles.companyContact}>
-            P.O Box: 82436-80100, Mombasa, Kenya · Tel: 0759000111 · info@nebsamdigital.com
-          </Text>
-          <Text style={styles.certificateTitle}>Certificate of Installation</Text>
+          <View style={styles.headerTextBlock}>
+            <Text style={styles.companyName}>Nebsam Digital Solutions (K) Ltd</Text>
+            <Text style={styles.companyContact}>
+              P.O Box: 82436-80100, Mombasa, Kenya · Tel: 0759000111 · info@nebsamdigital.com
+            </Text>
+            <Text style={styles.certificateTitle}>Certificate of Installation</Text>
+          </View>
+          {qr && <Image src={qr} style={styles.qrImage} />}
         </View>
 
         {/* Certificate Details */}
@@ -302,10 +313,7 @@ const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" 
             <Text style={styles.value}>{format(cert.expiryDate)}</Text>
             <View style={styles.dottedLine} />
           </View>
-          <View style={styles.qrAndSealRow}>
-            {qr && <Image src={qr} style={styles.qrImage} />}
-            <Image src={signatureUrl} style={styles.sealImage} />
-          </View>
+          <Image src={signatureUrl} style={styles.sealImage} />
           <Text style={styles.fittedBy}>Fitted By: Dennis Karani</Text>
         </View>
         <Text style={styles.finePrint}>
