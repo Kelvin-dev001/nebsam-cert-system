@@ -8,12 +8,18 @@ import {
   Stack,
   Snackbar,
   Alert,
+  Paper,
+  Grid,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { AuthContext } from "../context/AuthContext";
+import QRCode from "qrcode";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import CertificateDocument from "../components/CertificateDocument"; // Create this as shown previously
+import CertificateDocument from "../components/CertificateDocument";
+import { AuthContext } from "../context/AuthContext";
+
+// Font families should be registered in public/index.html for browser preview
+// See earlier instructions
 
 const API_BASE = process.env.REACT_APP_API_BASE;
 
@@ -24,26 +30,29 @@ const CertificatePreview = () => {
 
   const [cert, setCert] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success"
-  });
+  const [qrDataUrl, setQrDataUrl] = useState(null);
+  const [signatureUrl, setSignatureUrl] = useState("/seal.png"); // Path to seal/signature image
+  const [showHtmlPreview, setShowHtmlPreview] = useState(true);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
   useEffect(() => {
     setLoading(true);
     axios
-      .get(`${API_BASE}/api/certificates/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+      .get(`${API_BASE}/api/certificates/${id}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => {
+        setCert(res.data);
+        // Create QR code for certificate verification/public preview URL
+        const verificationUrl = `${window.location.origin}/certificates/${res.data._id}/preview`;
+        QRCode.toDataURL(verificationUrl, { margin: 1, width: 120 })
+          .then(url => setQrDataUrl(url))
+          .catch(() => setQrDataUrl(null));
+        setSignatureUrl("/seal.png"); // Update if you have a different filename
       })
-      .then(res => setCert(res.data))
       .catch(() => setCert(null))
       .finally(() => setLoading(false));
   }, [id, token]);
 
-  const handleSnackbarClose = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
+  const handleSnackbarClose = () => setSnackbar({ ...snackbar, open: false });
 
   if (loading)
     return (
@@ -58,133 +67,157 @@ const CertificatePreview = () => {
       </Box>
     );
 
+  const format = d => (d ? d.slice(0, 10) : "");
+
+  // --- HTML Preview Component ---
+  function CertificateHtmlPreview({ cert, qrDataUrl, signatureUrl }) {
+    return (
+      <Box sx={{ background: "#fff", borderRadius: 2, boxShadow: 2, p: 3, position: "relative", overflow: "hidden" }}>
+        {/* Watermark */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: "30%",
+            left: "-20%",
+            right: "-20%",
+            zIndex: 0,
+            opacity: 0.07,
+            pointerEvents: "none",
+            transform: "rotate(-30deg)",
+            fontWeight: 700,
+            fontSize: { xs: 44, md: 68 },
+            color: "#0a4b7a",
+            userSelect: "none",
+            textAlign: "center",
+            fontFamily: "'Lora', serif",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Nebsam Digital Solutions &nbsp; Nebsam Digital Solutions &nbsp; Nebsam Digital Solutions
+        </Box>
+
+        {/* Header */}
+        <Box textAlign="center" mb={1} sx={{ position: "relative", zIndex: 1 }}>
+          <img src="/logo.png" alt="logo" style={{ width: 120, marginBottom: 6 }} />
+          <Typography variant="h6" sx={{ fontFamily: "'Lora', serif", fontWeight: 700 }}>
+            Nebsam Digital Solutions (K) Ltd
+          </Typography>
+          <Typography sx={{ fontWeight: 700, fontSize: 12, color: "#333" }}>
+            P.O Box: 82436-80100, Mombasa, Kenya · Tel: 0759000111 · info@nebsamdigital.com
+          </Typography>
+          <Typography sx={{ mt: 1, fontWeight: 700, fontSize: 16, textDecoration: "underline", color: "#0a4b7a" }}>
+            Certificate of Installation
+          </Typography>
+        </Box>
+
+        {/* Sections */}
+        <Box mt={3} sx={{ position: "relative", zIndex: 1 }}>
+          {/* Certificate Details */}
+          <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
+            <Typography sx={{ fontWeight: 700, color: "#0a4b7a", mb: 1, fontFamily: "'Lora', serif" }}>Certificate Details</Typography>
+            <Grid container spacing={1}>
+              <Grid item xs={6}><b>Type:</b></Grid>
+              <Grid item xs={6}>{cert.type === "tracking" ? "Vehicle Tracking Installation" : "Radio Call Ownership"}</Grid>
+              <Grid item xs={6}><b>Serial No:</b></Grid>
+              <Grid item xs={6}>{cert.certificateSerialNo}</Grid>
+              <Grid item xs={6}><b>Date of Issue:</b></Grid>
+              <Grid item xs={6}>{format(cert.dateOfIssue)}</Grid>
+            </Grid>
+          </Paper>
+
+          {/* Owner Details */}
+          <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
+            <Typography sx={{ fontWeight: 700, color: "#0a4b7a", mb: 1, fontFamily: "'Lora', serif" }}>Owner Details</Typography>
+            <Grid container spacing={1}>
+              <Grid item xs={6}><b>Issued To:</b></Grid>
+              <Grid item xs={6}>{cert.issuedTo}</Grid>
+              <Grid item xs={6}><b>ID Number:</b></Grid>
+              <Grid item xs={6}>{cert.idNumber}</Grid>
+              <Grid item xs={6}><b>Phone Number:</b></Grid>
+              <Grid item xs={6}>{cert.phoneNumber}</Grid>
+            </Grid>
+          </Paper>
+
+          {/* Vehicle Details */}
+          <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
+            <Typography sx={{ fontWeight: 700, color: "#0a4b7a", mb: 1, fontFamily: "'Lora', serif" }}>Vehicle Details</Typography>
+            <Grid container spacing={1}>
+              <Grid item xs={6}><b>Registration No:</b></Grid>
+              <Grid item xs={6}>{cert.vehicleRegNumber}</Grid>
+              <Grid item xs={6}><b>Make:</b></Grid>
+              <Grid item xs={6}>{cert.make}</Grid>
+              <Grid item xs={6}><b>Body Type:</b></Grid>
+              <Grid item xs={6}>{cert.bodyType}</Grid>
+            </Grid>
+          </Paper>
+
+          {/* Device Details */}
+          <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
+            <Typography sx={{ fontWeight: 700, color: "#0a4b7a", mb: 1, fontFamily: "'Lora', serif" }}>Device Details</Typography>
+            <Grid container spacing={1}>
+              <Grid item xs={6}><b>Device Fitted With:</b></Grid>
+              <Grid item xs={6}>{cert.deviceFittedWith}</Grid>
+              <Grid item xs={6}><b>IMEI No:</b></Grid>
+              <Grid item xs={6}>{cert.imeiNo}</Grid>
+              <Grid item xs={6}><b>SIM No:</b></Grid>
+              <Grid item xs={6}>{cert.simNo}</Grid>
+              <Grid item xs={6}><b>Installation Date:</b></Grid>
+              <Grid item xs={6}>{format(cert.dateOfInstallation)}</Grid>
+              <Grid item xs={6}><b>Expiry Date:</b></Grid>
+              <Grid item xs={6}>{format(cert.expiryDate)}</Grid>
+            </Grid>
+            <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2, alignItems: "center" }}>
+              {qrDataUrl ? <img src={qrDataUrl} alt="qr" style={{ width: 90 }} /> : <div />}
+              <img src={signatureUrl} alt="seal" style={{ width: 110 }} />
+            </Box>
+            <Typography sx={{ mt: 1, fontWeight: 700 }}>Fitted By: Dennis Karani</Typography>
+          </Paper>
+        </Box>
+
+        {/* Fine print */}
+        <Typography sx={{ fontSize: 10, textAlign: "center", color: "#777", mt: 2 }}>
+          This is a computer generated certificate — no signature is required.
+        </Typography>
+      </Box>
+    );
+  }
+
+  // --- Main Render ---
   return (
-    <Box maxWidth={700} mx="auto" mt={4} p={3} boxShadow={2} borderRadius={2}>
-      <Typography variant="h5" mb={2}>
-        Certificate Preview
-      </Typography>
+    <Box maxWidth={900} mx="auto" mt={3} p={3}>
+      <Typography variant="h5" mb={2}>Certificate Preview</Typography>
       <Divider />
-      <Stack spacing={1} mt={2}>
-        <Typography>
-          <b>Type:</b>{" "}
-          {cert.type === "tracking"
-            ? "Vehicle Tracking Installation"
-            : "Radio Call Ownership"}
-        </Typography>
-        {cert.type === "tracking" && (
-          <>
-            <Typography>
-              <b>Vehicle Reg Number:</b> {cert.vehicleRegNumber}
-            </Typography>
-            <Typography>
-              <b>Make:</b> {cert.make}
-            </Typography>
-            <Typography>
-              <b>Body Type:</b> {cert.bodyType}
-            </Typography>
-            <Typography>
-              <b>Chassis Number:</b> {cert.chassisNumber}
-            </Typography>
-            <Typography>
-              <b>Device Fitted With:</b> {cert.deviceFittedWith}
-            </Typography>
-            <Typography>
-              <b>IMEI No:</b> {cert.imeiNo}
-            </Typography>
-            <Typography>
-              <b>SIM No:</b> {cert.simNo}
-            </Typography>
-            <Typography>
-              <b>Date of Installation:</b> {cert.dateOfInstallation?.slice(0, 10)}
-            </Typography>
-            <Typography>
-              <b>Expiry Date:</b> {cert.expiryDate?.slice(0, 10)}
-            </Typography>
-            <Typography>
-              <b>Issued To:</b> {cert.issuedTo}
-            </Typography>
-            <Typography>
-              <b>ID Number:</b> {cert.idNumber}
-            </Typography>
-            <Typography>
-              <b>Phone Number:</b> {cert.phoneNumber}
-            </Typography>
-          </>
+      <Stack spacing={2} mt={2}>
+        <Box display="flex" gap={2} alignItems="center">
+          <Button variant="outlined" onClick={() => setShowHtmlPreview(s => !s)}>
+            {showHtmlPreview ? "Hide Preview" : "Show Preview"}
+          </Button>
+          <PDFDownloadLink
+            document={<CertificateDocument cert={cert} qr={qrDataUrl} signatureUrl={signatureUrl} />}
+            fileName={`certificate_${cert.certificateSerialNo}.pdf`}
+            style={{ textDecoration: "none", marginLeft: 8 }}
+          >
+            {({ loading: pdfLoading }) =>
+              pdfLoading ? (
+                <Button variant="contained" disabled>Preparing PDF...</Button>
+              ) : (
+                <Button variant="contained" color="success">Download PDF</Button>
+              )
+            }
+          </PDFDownloadLink>
+          <Button variant="contained" onClick={() => navigate(`/certificates/${cert._id}/edit`)}>Edit</Button>
+          <Button variant="outlined" onClick={() => navigate(-1)}>Back</Button>
+        </Box>
+
+        {showHtmlPreview && (
+          <Box mt={1}>
+            <CertificateHtmlPreview cert={cert} qrDataUrl={qrDataUrl} signatureUrl={signatureUrl} />
+          </Box>
         )}
-        {cert.type === "radio" && (
-          <>
-            <Typography>
-              <b>Company Name:</b> {cert.companyName}
-            </Typography>
-            <Typography>
-              <b>Radio License Number:</b> {cert.radioLicenseNumber}
-            </Typography>
-            <Typography>
-              <b>Device ID:</b> {cert.deviceId}
-            </Typography>
-            <Typography>
-              <b>Model:</b> {cert.model}
-            </Typography>
-            <Typography>
-              <b>Issued To:</b> {cert.issuedTo}
-            </Typography>
-            <Typography>
-              <b>CAK Number:</b> {cert.cakNumber}
-            </Typography>
-          </>
-        )}
-        <Typography>
-          <b>Certificate Serial No:</b> {cert.certificateSerialNo}
-        </Typography>
-        <Typography>
-          <b>Date of Issue:</b> {cert.dateOfIssue?.slice(0, 10)}
-        </Typography>
       </Stack>
 
-      {/* Edit Button */}
-      <Button
-        variant="contained"
-        sx={{ mt: 4, mr: 2 }}
-        onClick={() => navigate(`/certificates/${cert._id}/edit`)}
-      >
-        Edit
-      </Button>
-
-      {/* PDF Download Button */}
-      <PDFDownloadLink
-        document={<CertificateDocument cert={cert} />}
-        fileName={`certificate_${cert.certificateSerialNo}.pdf`}
-        style={{ textDecoration: "none", marginLeft: 8 }}
-      >
-        {({ loading }) =>
-          loading ? (
-            <Button variant="contained" disabled sx={{ mt: 4 }}>
-              Preparing PDF...
-            </Button>
-          ) : (
-            <Button variant="contained" color="success" sx={{ mt: 4 }}>
-              Download Professional PDF
-            </Button>
-          )
-        }
-      </PDFDownloadLink>
-
-      <Button variant="outlined" sx={{ mt: 4 }} onClick={() => navigate(-1)}>
-        Back
-      </Button>
-
-      {/* Snackbar for success/fail feedback */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
+      <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={handleSnackbarClose} anchorOrigin={{ vertical: "top", horizontal: "center" }}>
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: "100%" }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
