@@ -9,128 +9,137 @@ import {
   Font,
 } from "@react-pdf/renderer";
 
-/*
-  src/components/CertificateDocument.js
-  - Professional certificate for @react-pdf/renderer
-  - Expected props:
-      cert: object (certificate data)
-      qr: string (data URL for QR image) optional
-      signatureUrl: string (path to signature/seal image) optional, default '/seal.png'
-  - Assets expected in public/:
-      /logo.png, /seal.png, /fonts/Lora-Regular.ttf, /fonts/Lora-Bold.ttf, /fonts/Roboto-Regular.ttf
-*/
-
-// Register fonts that will be embedded in the PDF
+// Font registration (ensure TTF files are in public/fonts)
 Font.register({ family: "Lora", src: "/fonts/Lora-Regular.ttf" });
 Font.register({ family: "Lora-Bold", src: "/fonts/Lora-Bold.ttf" });
 Font.register({ family: "Roboto", src: "/fonts/Roboto-Regular.ttf" });
 
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: "#ffffff",
-    padding: 36,
+    backgroundColor: "#fff",
+    padding: 30,
     fontFamily: "Roboto",
     position: "relative",
-    fontSize: 11,
+    fontSize: 10,
     color: "#111",
   },
-
-  watermarkContainer: {
+  pageBorder: {
     position: "absolute",
-    top: "30%",
-    left: -40,
-    right: -40,
-    alignItems: "center",
+    top: 10,
+    left: 10,
+    right: 10,
+    bottom: 10,
+    border: "2pt solid #0a4b7a",
+    borderRadius: 14,
+    zIndex: 99,
+  },
+  // Watermark grid, small text, fills the page
+  watermarkGrid: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
     zIndex: 0,
-    opacity: 0.06,
-    transform: "rotate(-30deg)",
+    left: 0,
+    top: 0,
+    opacity: 0.13,
+    flexDirection: "column",
+    justifyContent: "space-between",
+  },
+  watermarkRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginLeft: 8,
+    marginRight: 8,
   },
   watermarkText: {
-    fontSize: 56,
+    fontSize: 7,
+    color: "#0a4b7a",
+    fontFamily: "Lora",
+    marginRight: 4,
+    marginBottom: 2,
     fontWeight: "bold",
-    color: "#222",
-    letterSpacing: 3,
   },
-
   header: {
     alignItems: "center",
-    marginBottom: 6,
-    zIndex: 1,
+    marginBottom: 2,
+    zIndex: 2,
   },
   logo: {
-    width: 110,
+    width: 80,
     height: "auto",
-    marginBottom: 6,
+    marginBottom: 2,
   },
   companyName: {
-    fontSize: 18,
+    fontSize: 13,
     fontFamily: "Lora-Bold",
     fontWeight: "bold",
     textAlign: "center",
+    color: "#0a4b7a",
+    marginBottom: 2,
   },
   companyContact: {
-    fontSize: 10,
+    fontSize: 8,
     fontFamily: "Roboto",
     fontWeight: "bold",
     textAlign: "center",
     color: "#333",
-    marginTop: 4,
+    marginBottom: 4,
   },
   certificateTitle: {
-    fontSize: 14,
+    fontSize: 11,
     fontFamily: "Lora",
     fontWeight: "bold",
     textAlign: "center",
-    marginTop: 8,
-    marginBottom: 12,
+    marginBottom: 6,
     textDecoration: "underline",
+    color: "#0a4b7a",
   },
-
-  contentContainer: {
-    marginTop: 6,
-    marginBottom: 6,
-    zIndex: 1,
-  },
-
+  // Section styles
   section: {
-    borderWidth: 1,
-    borderColor: "#2c3e50",
     borderRadius: 6,
-    padding: 12,
-    marginBottom: 12,
-    backgroundColor: "#fbfbfd",
-  },
-  sectionRow: {
-    flexDirection: "row",
-    marginBottom: 6,
+    padding: 6,
+    marginBottom: 5,
+    backgroundColor: "#f5f9ff",
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 9,
     fontFamily: "Lora",
     fontWeight: "bold",
     color: "#0a4b7a",
-    marginBottom: 8,
+    marginBottom: 3,
+    textAlign: "center",
+  },
+  // Horizontal grid for section fields
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 2,
+    gap: 3,
+  },
+  fieldBlock: {
+    flex: 1,
+    marginRight: 4,
   },
   label: {
-    width: 140,
     fontWeight: "bold",
-    fontSize: 10,
-    color: "#444",
+    fontSize: 8,
+    color: "#333",
+    fontFamily: "Roboto",
+    marginRight: 1,
+    marginBottom: 1,
   },
   value: {
-    fontSize: 11,
-    color: "#111",
-    flex: 1,
+    fontSize: 9,
+    color: "#0a4b7a",
+    fontFamily: "Lora-Bold",
+    marginBottom: 0,
   },
-
-  fittedBy: {
-    marginTop: 6,
-    fontSize: 10,
-    fontFamily: "Roboto",
-    fontWeight: "bold",
-    color: "#333",
+  dottedLine: {
+    borderBottom: "1pt dotted #0a4b7a",
+    marginTop: -4,
+    marginBottom: 4,
+    width: "100%",
   },
-
   qrAndSealRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -138,49 +147,59 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   qrImage: {
-    width: 90,
-    height: 90,
+    width: 60,
+    height: 60,
   },
   sealImage: {
-    width: 140,
-    height: 60,
+    width: 90,
+    height: 32,
     objectFit: "contain",
   },
-
+  fittedBy: {
+    marginTop: 2,
+    fontSize: 9,
+    fontFamily: "Roboto",
+    fontWeight: "bold",
+    color: "#333",
+  },
   finePrint: {
-    fontSize: 8,
+    fontSize: 7,
     textAlign: "center",
     color: "#777",
-    marginTop: 18,
+    marginTop: 6,
+    fontFamily: "Roboto",
+    marginBottom: 4,
   },
 });
 
-const format = (d) => {
-  if (!d) return "";
-  try {
-    return d.slice(0, 10);
-  } catch {
-    return String(d);
-  }
-};
+const format = d => (d ? d.slice(0, 10) : "");
 
 const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" }) => {
-  // keep watermark repeated to fill page visually
-  const watermarkRows = new Array(3).fill(0);
+  // Watermark grid: fill page with rows of watermarks
+  const watermarkRowsCount = 32; // more = denser
+  const watermarkColsCount = 7; // more = denser
+  const watermarkRowText = Array(watermarkColsCount).fill("Nebsam Digital Solutions");
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Watermark layer */}
-        <View style={styles.watermarkContainer} fixed>
-          {watermarkRows.map((_, idx) => (
-            <Text key={idx} style={styles.watermarkText}>
-              Nebsam Digital Solutions
-            </Text>
+        {/* Overall page border */}
+        <View style={styles.pageBorder} fixed />
+
+        {/* Watermark grid (fills entire background) */}
+        <View style={styles.watermarkGrid} fixed>
+          {Array(watermarkRowsCount).fill(0).map((_, rowIdx) => (
+            <View style={styles.watermarkRow} key={rowIdx}>
+              {watermarkRowText.map((text, colIdx) => (
+                <Text style={styles.watermarkText} key={colIdx + "_wm"}>
+                  {text}
+                </Text>
+              ))}
+            </View>
           ))}
         </View>
 
-        {/* Header: centered logo, company name, contact lines, title */}
+        {/* Certificate content (above watermark, inside border) */}
         <View style={styles.header}>
           <Image src="/logo.png" style={styles.logo} />
           <Text style={styles.companyName}>Nebsam Digital Solutions (K) Ltd</Text>
@@ -190,110 +209,109 @@ const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" 
           <Text style={styles.certificateTitle}>Certificate of Installation</Text>
         </View>
 
-        {/* Main content with 4 bordered sections */}
-        <View style={styles.contentContainer}>
-          {/* 1. Certificate Details */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Certificate Details</Text>
-
-            <View style={styles.sectionRow}>
+        {/* Certificate Details */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Certificate Details</Text>
+          <View style={styles.row}>
+            <View style={styles.fieldBlock}>
               <Text style={styles.label}>Type:</Text>
-              <Text style={styles.value}>
-                {cert.type === "tracking" ? "Vehicle Tracking Installation" : "Radio Call Ownership"}
-              </Text>
+              <Text style={styles.value}>{cert.type === "tracking" ? "Vehicle Tracking Installation" : "Radio Call Ownership"}</Text>
+              <View style={styles.dottedLine} />
             </View>
-
-            <View style={styles.sectionRow}>
+            <View style={styles.fieldBlock}>
               <Text style={styles.label}>Serial No:</Text>
               <Text style={styles.value}>{cert.certificateSerialNo || ""}</Text>
+              <View style={styles.dottedLine} />
             </View>
-
-            <View style={styles.sectionRow}>
+            <View style={styles.fieldBlock}>
               <Text style={styles.label}>Date of Issue:</Text>
               <Text style={styles.value}>{format(cert.dateOfIssue)}</Text>
+              <View style={styles.dottedLine} />
             </View>
           </View>
-
-          {/* 2. Owner Details */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Owner Details</Text>
-
-            <View style={styles.sectionRow}>
+        </View>
+        {/* Owner Details */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Owner Details</Text>
+          <View style={styles.row}>
+            <View style={styles.fieldBlock}>
               <Text style={styles.label}>Issued To:</Text>
               <Text style={styles.value}>{cert.issuedTo || ""}</Text>
+              <View style={styles.dottedLine} />
             </View>
-
-            <View style={styles.sectionRow}>
+            <View style={styles.fieldBlock}>
               <Text style={styles.label}>ID Number:</Text>
               <Text style={styles.value}>{cert.idNumber || ""}</Text>
+              <View style={styles.dottedLine} />
             </View>
-
-            <View style={styles.sectionRow}>
+            <View style={styles.fieldBlock}>
               <Text style={styles.label}>Phone Number:</Text>
               <Text style={styles.value}>{cert.phoneNumber || ""}</Text>
+              <View style={styles.dottedLine} />
             </View>
-          </View>
-
-          {/* 3. Vehicle Details */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Vehicle Details</Text>
-
-            <View style={styles.sectionRow}>
-              <Text style={styles.label}>Registration No:</Text>
-              <Text style={styles.value}>{cert.vehicleRegNumber || ""}</Text>
-            </View>
-
-            <View style={styles.sectionRow}>
-              <Text style={styles.label}>Make:</Text>
-              <Text style={styles.value}>{cert.make || ""}</Text>
-            </View>
-
-            <View style={styles.sectionRow}>
-              <Text style={styles.label}>Body Type:</Text>
-              <Text style={styles.value}>{cert.bodyType || ""}</Text>
-            </View>
-          </View>
-
-          {/* 4. Device Details */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Device Details</Text>
-
-            <View style={styles.sectionRow}>
-              <Text style={styles.label}>Device Fitted With:</Text>
-              <Text style={styles.value}>{cert.deviceFittedWith || ""}</Text>
-            </View>
-
-            <View style={styles.sectionRow}>
-              <Text style={styles.label}>IMEI No:</Text>
-              <Text style={styles.value}>{cert.imeiNo || ""}</Text>
-            </View>
-
-            <View style={styles.sectionRow}>
-              <Text style={styles.label}>SIM No:</Text>
-              <Text style={styles.value}>{cert.simNo || ""}</Text>
-            </View>
-
-            <View style={styles.sectionRow}>
-              <Text style={styles.label}>Installation Date:</Text>
-              <Text style={styles.value}>{format(cert.dateOfInstallation)}</Text>
-            </View>
-
-            <View style={styles.sectionRow}>
-              <Text style={styles.label}>Expiry Date:</Text>
-              <Text style={styles.value}>{format(cert.expiryDate)}</Text>
-            </View>
-
-            {/* QR + Seal */}
-            <View style={styles.qrAndSealRow}>
-              {qr ? <Image src={qr} style={styles.qrImage} /> : <View style={{ width: 90 }} />}
-              <Image src={signatureUrl} style={styles.sealImage} />
-            </View>
-
-            <Text style={styles.fittedBy}>Fitted By: Dennis Karani</Text>
           </View>
         </View>
 
-        {/* Footer fine print */}
+        {/* Vehicle Details */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Vehicle Details</Text>
+          <View style={styles.row}>
+            <View style={styles.fieldBlock}>
+              <Text style={styles.label}>Registration No:</Text>
+              <Text style={styles.value}>{cert.vehicleRegNumber || ""}</Text>
+              <View style={styles.dottedLine} />
+            </View>
+            <View style={styles.fieldBlock}>
+              <Text style={styles.label}>Make:</Text>
+              <Text style={styles.value}>{cert.make || ""}</Text>
+              <View style={styles.dottedLine} />
+            </View>
+            <View style={styles.fieldBlock}>
+              <Text style={styles.label}>Body Type:</Text>
+              <Text style={styles.value}>{cert.bodyType || ""}</Text>
+              <View style={styles.dottedLine} />
+            </View>
+          </View>
+        </View>
+
+        {/* Device Details */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Device Details</Text>
+          <View style={styles.row}>
+            <View style={styles.fieldBlock}>
+              <Text style={styles.label}>Device Fitted With:</Text>
+              <Text style={styles.value}>{cert.deviceFittedWith || ""}</Text>
+              <View style={styles.dottedLine} />
+            </View>
+            <View style={styles.fieldBlock}>
+              <Text style={styles.label}>IMEI No:</Text>
+              <Text style={styles.value}>{cert.imeiNo || ""}</Text>
+              <View style={styles.dottedLine} />
+            </View>
+            <View style={styles.fieldBlock}>
+              <Text style={styles.label}>SIM No:</Text>
+              <Text style={styles.value}>{cert.simNo || ""}</Text>
+              <View style={styles.dottedLine} />
+            </View>
+            <View style={styles.fieldBlock}>
+              <Text style={styles.label}>Installation Date:</Text>
+              <Text style={styles.value}>{format(cert.dateOfInstallation)}</Text>
+              <View style={styles.dottedLine} />
+            </View>
+            <View style={styles.fieldBlock}>
+              <Text style={styles.label}>Expiry Date:</Text>
+              <Text style={styles.value}>{format(cert.expiryDate)}</Text>
+              <View style={styles.dottedLine} />
+            </View>
+          </View>
+          {/* QR/Seal row (squeezed to fit) */}
+          <View style={styles.qrAndSealRow}>
+            {qr ? <Image src={qr} style={styles.qrImage} /> : <View style={{ width: 60 }} />}
+            <Image src={signatureUrl} style={styles.sealImage} />
+          </View>
+          <Text style={styles.fittedBy}>Fitted By: Dennis Karani</Text>
+        </View>
+        {/* Fine print */}
         <Text style={styles.finePrint}>
           This is a computer generated certificate — no signature is required.
         </Text>
