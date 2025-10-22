@@ -9,7 +9,7 @@ import {
   Font,
 } from "@react-pdf/renderer";
 
-// Font registration (ensure TTF files are in public/fonts)
+// Font registration
 Font.register({ family: "Lora", src: "/fonts/Lora-Regular.ttf" });
 Font.register({ family: "Lora-Bold", src: "/fonts/Lora-Bold.ttf" });
 Font.register({ family: "Roboto", src: "/fonts/Roboto-Regular.ttf" });
@@ -17,23 +17,24 @@ Font.register({ family: "Roboto", src: "/fonts/Roboto-Regular.ttf" });
 const styles = StyleSheet.create({
   page: {
     backgroundColor: "#fff",
-    padding: 30,
+    padding: 18,
     fontFamily: "Roboto",
     position: "relative",
-    fontSize: 10,
-    color: "#111",
+    fontSize: 9.2,
+    color: "#222",
+    minHeight: "100%",
   },
   pageBorder: {
     position: "absolute",
-    top: 10,
-    left: 10,
-    right: 10,
-    bottom: 10,
+    top: 6,
+    left: 6,
+    right: 6,
+    bottom: 6,
     border: "2pt solid #0a4b7a",
-    borderRadius: 14,
+    borderRadius: 12,
     zIndex: 99,
   },
-  // Watermark grid, small text, fills the page
+  // Watermark grid, denser and smaller
   watermarkGrid: {
     position: "absolute",
     width: "100%",
@@ -41,41 +42,44 @@ const styles = StyleSheet.create({
     zIndex: 0,
     left: 0,
     top: 0,
-    opacity: 0.13,
+    opacity: 0.12,
     flexDirection: "column",
     justifyContent: "space-between",
+    pointerEvents: "none",
   },
   watermarkRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginLeft: 8,
-    marginRight: 8,
+    marginLeft: 0,
+    marginRight: 0,
   },
   watermarkText: {
-    fontSize: 7,
+    fontSize: 6,
     color: "#0a4b7a",
     fontFamily: "Lora",
-    marginRight: 4,
+    marginRight: 2,
     marginBottom: 2,
     fontWeight: "bold",
+    transform: "rotate(-30deg)",
+    letterSpacing: 1,
   },
   header: {
     alignItems: "center",
-    marginBottom: 2,
+    marginBottom: 3,
     zIndex: 2,
   },
   logo: {
-    width: 80,
+    width: 70,
     height: "auto",
     marginBottom: 2,
   },
   companyName: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Lora-Bold",
     fontWeight: "bold",
     textAlign: "center",
     color: "#0a4b7a",
-    marginBottom: 2,
+    marginBottom: 1,
   },
   companyContact: {
     fontSize: 8,
@@ -83,81 +87,86 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     color: "#333",
-    marginBottom: 4,
+    marginBottom: 2,
   },
   certificateTitle: {
     fontSize: 11,
     fontFamily: "Lora",
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 6,
+    marginBottom: 5,
     textDecoration: "underline",
     color: "#0a4b7a",
   },
   // Section styles
   section: {
     borderRadius: 6,
-    padding: 6,
-    marginBottom: 5,
+    padding: 4,
+    marginBottom: 4,
     backgroundColor: "#f5f9ff",
+    border: "1pt solid #eee",
   },
   sectionTitle: {
-    fontSize: 9,
+    fontSize: 8.5,
     fontFamily: "Lora",
     fontWeight: "bold",
     color: "#0a4b7a",
-    marginBottom: 3,
+    marginBottom: 2,
     textAlign: "center",
   },
   // Horizontal grid for section fields
   row: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
     marginBottom: 2,
-    gap: 3,
+    gap: 2,
   },
   fieldBlock: {
     flex: 1,
-    marginRight: 4,
+    marginRight: 2,
+    minWidth: 68,
+    maxWidth: 100,
   },
   label: {
     fontWeight: "bold",
-    fontSize: 8,
+    fontSize: 7.5,
     color: "#333",
     fontFamily: "Roboto",
-    marginRight: 1,
-    marginBottom: 1,
+    marginBottom: 0,
   },
   value: {
-    fontSize: 9,
+    fontSize: 8.5,
     color: "#0a4b7a",
     fontFamily: "Lora-Bold",
     marginBottom: 0,
+    fontWeight: "bold",
+    letterSpacing: 0.1,
+    textAlign: "left",
   },
   dottedLine: {
-    borderBottom: "1pt dotted #0a4b7a",
-    marginTop: -4,
-    marginBottom: 4,
+    borderBottom: "0.8pt dotted #0a4b7a",
+    marginTop: -2,
+    marginBottom: 2,
     width: "100%",
   },
   qrAndSealRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 8,
+    marginTop: 4,
     alignItems: "center",
   },
   qrImage: {
-    width: 60,
-    height: 60,
+    width: 43,
+    height: 43,
   },
   sealImage: {
-    width: 90,
-    height: 32,
+    width: 70,
+    height: 26,
     objectFit: "contain",
   },
   fittedBy: {
-    marginTop: 2,
-    fontSize: 9,
+    marginTop: 1,
+    fontSize: 8,
     fontFamily: "Roboto",
     fontWeight: "bold",
     color: "#333",
@@ -166,18 +175,18 @@ const styles = StyleSheet.create({
     fontSize: 7,
     textAlign: "center",
     color: "#777",
-    marginTop: 6,
+    marginTop: 3,
     fontFamily: "Roboto",
-    marginBottom: 4,
+    marginBottom: 2,
   },
 });
 
 const format = d => (d ? d.slice(0, 10) : "");
 
 const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" }) => {
-  // Watermark grid: fill page with rows of watermarks
-  const watermarkRowsCount = 32; // more = denser
-  const watermarkColsCount = 7; // more = denser
+  // Watermark grid: fill page with rows of watermarks, dense
+  const watermarkRowsCount = 45; // denser
+  const watermarkColsCount = 12; // denser
   const watermarkRowText = Array(watermarkColsCount).fill("Nebsam Digital Solutions");
 
   return (
@@ -230,6 +239,7 @@ const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" 
             </View>
           </View>
         </View>
+        
         {/* Owner Details */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Owner Details</Text>
@@ -306,7 +316,7 @@ const CertificateDocument = ({ cert = {}, qr = null, signatureUrl = "/seal.png" 
           </View>
           {/* QR/Seal row (squeezed to fit) */}
           <View style={styles.qrAndSealRow}>
-            {qr ? <Image src={qr} style={styles.qrImage} /> : <View style={{ width: 60 }} />}
+            {qr ? <Image src={qr} style={styles.qrImage} /> : <View style={{ width: 43 }} />}
             <Image src={signatureUrl} style={styles.sealImage} />
           </View>
           <Text style={styles.fittedBy}>Fitted By: Dennis Karani</Text>
