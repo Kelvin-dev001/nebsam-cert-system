@@ -8,8 +8,6 @@ import {
   Stack,
   Snackbar,
   Alert,
-  Paper,
-  Grid,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -31,7 +29,6 @@ const CertificatePreview = () => {
   const [cert, setCert] = useState(null);
   const [loading, setLoading] = useState(true);
   const [qrDataUrl, setQrDataUrl] = useState(null);
-  const [signatureUrl, setSignatureUrl] = useState("/seal.png"); // Path to seal/signature image
   const [showHtmlPreview, setShowHtmlPreview] = useState(true);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
@@ -46,7 +43,6 @@ const CertificatePreview = () => {
         QRCode.toDataURL(verificationUrl, { margin: 1, width: 120 })
           .then(url => setQrDataUrl(url))
           .catch(() => setQrDataUrl(null));
-        setSignatureUrl("/seal.png"); // Update if you have a different filename
       })
       .catch(() => setCert(null))
       .finally(() => setLoading(false));
@@ -69,115 +65,99 @@ const CertificatePreview = () => {
 
   const format = d => (d ? d.slice(0, 10) : "");
 
-  // --- HTML Preview Component ---
-  function CertificateHtmlPreview({ cert, qrDataUrl, signatureUrl }) {
+  // --- HTML Preview Component (template background overlay) ---
+  const TEMPLATE_W = 595.28;
+  const TEMPLATE_H = 841.89;
+
+  function ValOverlay({ x, y, children }) {
     return (
-      <Box sx={{ background: "#fff", borderRadius: 2, boxShadow: 2, p: 3, position: "relative", overflow: "hidden" }}>
-        {/* Watermark */}
+      <Box
+        sx={{
+          position: "absolute",
+          left: `${(x / TEMPLATE_W) * 100}%`,
+          top: `${(y / TEMPLATE_H) * 100}%`,
+          fontSize: "clamp(8px, 1.2vw, 11px)",
+          color: "#111",
+          fontFamily: "Roboto, sans-serif",
+          fontWeight: 600,
+          whiteSpace: "nowrap",
+          lineHeight: 1,
+        }}
+      >
+        {children}
+      </Box>
+    );
+  }
+
+  function CertificateHtmlPreview({ cert, qrDataUrl }) {
+    return (
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          paddingBottom: `${(TEMPLATE_H / TEMPLATE_W) * 100}%`,
+          overflow: "hidden",
+          background: "#fff",
+          boxShadow: 3,
+        }}
+      >
+        {/* Background template image */}
         <Box
+          component="img"
+          src="/certificate-template.png"
+          alt="certificate template"
           sx={{
             position: "absolute",
-            top: "30%",
-            left: "-20%",
-            right: "-20%",
-            zIndex: 0,
-            opacity: 0.07,
-            pointerEvents: "none",
-            transform: "rotate(-30deg)",
-            fontWeight: 700,
-            fontSize: { xs: 44, md: 68 },
-            color: "#0a4b7a",
-            userSelect: "none",
-            textAlign: "center",
-            fontFamily: "'Lora', serif",
-            whiteSpace: "nowrap",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "fill",
+            display: "block",
           }}
-        >
-          Nebsam Digital Solutions &nbsp; Nebsam Digital Solutions &nbsp; Nebsam Digital Solutions
-        </Box>
+        />
 
-        {/* Header */}
-        <Box textAlign="center" mb={1} sx={{ position: "relative", zIndex: 1 }}>
-          <img src="/logo.png" alt="logo" style={{ width: 120, marginBottom: 6 }} />
-          <Typography variant="h6" sx={{ fontFamily: "'Lora', serif", fontWeight: 700 }}>
-            Nebsam Digital Solutions (K) Ltd
-          </Typography>
-          <Typography sx={{ fontWeight: 700, fontSize: 12, color: "#333" }}>
-            P.O Box: 82436-80100, Mombasa, Kenya · Tel: 0759000111 · info@nebsamdigital.com
-          </Typography>
-          <Typography sx={{ mt: 1, fontWeight: 700, fontSize: 16, textDecoration: "underline", color: "#0a4b7a" }}>
-            Certificate of Installation
-          </Typography>
-        </Box>
+        {/* Certificate Details */}
+        <ValOverlay x={62} y={295}>
+          {cert.type === "tracking" ? "Vehicle Tracking Installation" : "Radio Call Ownership"}
+        </ValOverlay>
+        <ValOverlay x={62} y={348}>{cert.certificateSerialNo || ""}</ValOverlay>
+        <ValOverlay x={62} y={393}>{format(cert.dateOfIssue)}</ValOverlay>
 
-        {/* Sections */}
-        <Box mt={3} sx={{ position: "relative", zIndex: 1 }}>
-          {/* Certificate Details */}
-          <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
-            <Typography sx={{ fontWeight: 700, color: "#0a4b7a", mb: 1, fontFamily: "'Lora', serif" }}>Certificate Details</Typography>
-            <Grid container spacing={1}>
-              <Grid item xs={6}><b>Type:</b></Grid>
-              <Grid item xs={6}>{cert.type === "tracking" ? "Vehicle Tracking Installation" : "Radio Call Ownership"}</Grid>
-              <Grid item xs={6}><b>Serial No:</b></Grid>
-              <Grid item xs={6}>{cert.certificateSerialNo}</Grid>
-              <Grid item xs={6}><b>Date of Issue:</b></Grid>
-              <Grid item xs={6}>{format(cert.dateOfIssue)}</Grid>
-            </Grid>
-          </Paper>
+        {/* Owner Details */}
+        <ValOverlay x={62} y={478}>{cert.issuedTo || ""}</ValOverlay>
+        <ValOverlay x={62} y={517}>{cert.idNumber || ""}</ValOverlay>
+        <ValOverlay x={62} y={555}>{cert.phoneNumber || ""}</ValOverlay>
 
-          {/* Owner Details */}
-          <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
-            <Typography sx={{ fontWeight: 700, color: "#0a4b7a", mb: 1, fontFamily: "'Lora', serif" }}>Owner Details</Typography>
-            <Grid container spacing={1}>
-              <Grid item xs={6}><b>Issued To:</b></Grid>
-              <Grid item xs={6}>{cert.issuedTo}</Grid>
-              <Grid item xs={6}><b>ID Number:</b></Grid>
-              <Grid item xs={6}>{cert.idNumber}</Grid>
-              <Grid item xs={6}><b>Phone Number:</b></Grid>
-              <Grid item xs={6}>{cert.phoneNumber}</Grid>
-            </Grid>
-          </Paper>
+        {/* Vehicle Details — left column */}
+        <ValOverlay x={145} y={635}>{cert.vehicleRegNumber || ""}</ValOverlay>
+        <ValOverlay x={62} y={665}>{cert.make || ""}</ValOverlay>
+        <ValOverlay x={130} y={695}>{cert.bodyType || ""}</ValOverlay>
 
-          {/* Vehicle Details */}
-          <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
-            <Typography sx={{ fontWeight: 700, color: "#0a4b7a", mb: 1, fontFamily: "'Lora', serif" }}>Vehicle Details</Typography>
-            <Grid container spacing={1}>
-              <Grid item xs={6}><b>Registration No:</b></Grid>
-              <Grid item xs={6}>{cert.vehicleRegNumber}</Grid>
-              <Grid item xs={6}><b>Make:</b></Grid>
-              <Grid item xs={6}>{cert.make}</Grid>
-              <Grid item xs={6}><b>Body Type:</b></Grid>
-              <Grid item xs={6}>{cert.bodyType}</Grid>
-            </Grid>
-          </Paper>
+        {/* Vehicle Details — right column */}
+        <ValOverlay x={355} y={635}>{cert.deviceFittedWith || ""}</ValOverlay>
+        <ValOverlay x={388} y={668}>{cert.imeiNo || ""}</ValOverlay>
+        <ValOverlay x={388} y={695}>{cert.simNo || ""}</ValOverlay>
+        <ValOverlay x={415} y={722}>{format(cert.dateOfInstallation)}</ValOverlay>
+        <ValOverlay x={415} y={748}>{format(cert.expiryDate)}</ValOverlay>
 
-          {/* Device Details */}
-          <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2 }}>
-            <Typography sx={{ fontWeight: 700, color: "#0a4b7a", mb: 1, fontFamily: "'Lora', serif" }}>Device Details</Typography>
-            <Grid container spacing={1}>
-              <Grid item xs={6}><b>Device Fitted With:</b></Grid>
-              <Grid item xs={6}>{cert.deviceFittedWith}</Grid>
-              <Grid item xs={6}><b>IMEI No:</b></Grid>
-              <Grid item xs={6}>{cert.imeiNo}</Grid>
-              <Grid item xs={6}><b>SIM No:</b></Grid>
-              <Grid item xs={6}>{cert.simNo}</Grid>
-              <Grid item xs={6}><b>Installation Date:</b></Grid>
-              <Grid item xs={6}>{format(cert.dateOfInstallation)}</Grid>
-              <Grid item xs={6}><b>Expiry Date:</b></Grid>
-              <Grid item xs={6}>{format(cert.expiryDate)}</Grid>
-            </Grid>
-            <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2, alignItems: "center" }}>
-              {qrDataUrl ? <img src={qrDataUrl} alt="qr" style={{ width: 90 }} /> : <div />}
-              <img src={signatureUrl} alt="seal" style={{ width: 110 }} />
-            </Box>
-            <Typography sx={{ mt: 1, fontWeight: 700 }}>Fitted By: Dennis Karani</Typography>
-          </Paper>
-        </Box>
+        {/* Bottom — Fitted By */}
+        <ValOverlay x={100} y={778}>Dennis Karani</ValOverlay>
 
-        {/* Fine print */}
-        <Typography sx={{ fontSize: 10, textAlign: "center", color: "#777", mt: 2 }}>
-          This is a computer generated certificate — no signature is required.
-        </Typography>
+        {/* QR Code */}
+        {qrDataUrl && (
+          <Box
+            component="img"
+            src={qrDataUrl}
+            alt="qr"
+            sx={{
+              position: "absolute",
+              left: `${(458 / TEMPLATE_W) * 100}%`,
+              top: `${(750 / TEMPLATE_H) * 100}%`,
+              width: `${(80 / TEMPLATE_W) * 100}%`,
+            }}
+          />
+        )}
       </Box>
     );
   }
@@ -193,7 +173,7 @@ const CertificatePreview = () => {
             {showHtmlPreview ? "Hide Preview" : "Show Preview"}
           </Button>
           <PDFDownloadLink
-            document={<CertificateDocument cert={cert} qr={qrDataUrl} signatureUrl={signatureUrl} />}
+            document={<CertificateDocument cert={cert} qr={qrDataUrl} />}
             fileName={`certificate_${cert.certificateSerialNo}.pdf`}
             style={{ textDecoration: "none", marginLeft: 8 }}
           >
@@ -211,7 +191,7 @@ const CertificatePreview = () => {
 
         {showHtmlPreview && (
           <Box mt={1}>
-            <CertificateHtmlPreview cert={cert} qrDataUrl={qrDataUrl} signatureUrl={signatureUrl} />
+            <CertificateHtmlPreview cert={cert} qrDataUrl={qrDataUrl} />
           </Box>
         )}
       </Stack>

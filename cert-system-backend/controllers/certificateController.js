@@ -1,6 +1,7 @@
 const Certificate = require('../models/Certificate');
 const { validationResult } = require('express-validator');
 const PDFDocument = require('pdfkit');
+const path = require('path');
 const { sendOtpSms } = require('../utils/sms');
 
 // Utility to auto-generate serial number with prefix NDS-
@@ -148,7 +149,7 @@ exports.shareCertificate = async (req, res) => {
       return res.status(403).json({ msg: "Not authorized" });
     }
 
-    const doc = new PDFDocument();
+    const doc = new PDFDocument({ size: 'A4', margin: 0 });
     let buffers = [];
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', () => {
@@ -158,38 +159,48 @@ exports.shareCertificate = async (req, res) => {
       res.send(pdfData);
     });
 
-    // PDF Content
-    doc.fontSize(20).text("Certificate", { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(14).text(`Type: ${cert.type === "tracking" ? "Vehicle Tracking Installation" : "Radio Call Ownership"}`);
-    doc.text(`Certificate Serial No: ${cert.certificateSerialNo}`);
-    doc.text(`Issued To: ${cert.issuedTo}`);
-    doc.text(`Date of Issue: ${cert.dateOfIssue?.toISOString().slice(0,10)}`);
+    const templatePath = process.env.CERT_TEMPLATE_PATH ||
+      path.join(__dirname, '../../frontend/public/certificate-template.png');
+    const format = d => (d ? d.toISOString().slice(0, 10) : '');
 
-    // *** REMOVED Approval Status and Created By ***
+    // Draw full-page background template
+    try {
+      doc.image(templatePath, 0, 0, { width: 595.28, height: 841.89 });
+    } catch (imgErr) {
+      console.warn(`[CERT PRINT] Template image not found at ${templatePath}, rendering without background.`);
+    }
 
-    if (cert.type === "tracking") {
-      doc.moveDown();
-      doc.fontSize(14).text(`Vehicle Reg Number: ${cert.vehicleRegNumber}`);
-      doc.text(`Make: ${cert.make}`);
-      doc.text(`Body Type: ${cert.bodyType}`);
-      doc.text(`Chassis Number: ${cert.chassisNumber}`);
-      doc.text(`Device Fitted With: ${cert.deviceFittedWith}`);
-      doc.text(`IMEI No: ${cert.imeiNo}`);
-      doc.text(`SIM No: ${cert.simNo}`);
-      doc.text(`Date of Installation: ${cert.dateOfInstallation?.toISOString().slice(0,10)}`);
-      doc.text(`Expiry Date: ${cert.expiryDate?.toISOString().slice(0,10)}`);
-      doc.text(`ID Number: ${cert.idNumber}`);
-      doc.text(`Phone Number: ${cert.phoneNumber}`);
+    // Overlay dynamic values at mapped coordinates (same as frontend)
+    doc.font('Helvetica').fontSize(10).fillColor('#111111');
+
+    const isTracking = cert.type === 'tracking';
+
+    // Certificate Details
+    doc.text(isTracking ? 'Vehicle Tracking Installation' : 'Radio Call Ownership', 62, 295);
+    doc.text(cert.certificateSerialNo || '', 62, 348);
+    doc.text(format(cert.dateOfIssue), 62, 393);
+
+    // Owner Details
+    doc.text(cert.issuedTo || '', 62, 478);
+    doc.text(cert.idNumber || '', 62, 517);
+    doc.text(cert.phoneNumber || '', 62, 555);
+
+    if (isTracking) {
+      // Vehicle Details — left column
+      doc.text(cert.vehicleRegNumber || '', 145, 635);
+      doc.text(cert.make || '', 62, 665);
+      doc.text(cert.bodyType || '', 130, 695);
+
+      // Vehicle Details — right column
+      doc.text(cert.deviceFittedWith || '', 355, 635);
+      doc.text(cert.imeiNo || '', 388, 668);
+      doc.text(cert.simNo || '', 388, 695);
+      doc.text(format(cert.dateOfInstallation), 415, 722);
+      doc.text(format(cert.expiryDate), 415, 748);
     }
-    if (cert.type === "radio") {
-      doc.moveDown();
-      doc.fontSize(14).text(`Company Name: ${cert.companyName}`);
-      doc.text(`Radio License Number: ${cert.radioLicenseNumber}`);
-      doc.text(`Device ID: ${cert.deviceId}`);
-      doc.text(`Model: ${cert.model}`);
-      doc.text(`CAK Number: ${cert.cakNumber}`);
-    }
+
+    // Bottom — Fitted By (hardcoded)
+    doc.text('Dennis Karani', 100, 778);
 
     doc.end();
     console.log(`[CERT PRINT SUCCESS] CertID: ${cert._id}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
