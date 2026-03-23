@@ -51,7 +51,7 @@ const schema = Yup.object().shape({
 
 const CertificateNewTracking = () => {
   const navigate = useNavigate();
-  const { token, user } = useContext(AuthContext); // Make sure user is included
+  const { token } = useContext(AuthContext);
   const { control, handleSubmit, formState: { errors } } = useForm({ resolver: yupResolver(schema) });
 
   const onSubmit = async (data) => {
@@ -61,7 +61,6 @@ const CertificateNewTracking = () => {
         {
           ...data,
           type: "tracking"
-          
         },
         {
           headers: { Authorization: `Bearer ${token}` }
