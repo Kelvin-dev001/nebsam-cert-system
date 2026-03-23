@@ -17,8 +17,6 @@ const otpSchema = Yup.object().shape({
     .length(6, "OTP must be 6 digits"),
 });
 
-const API_BASE = process.env.REACT_APP_API_BASE;
-
 const Login = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
