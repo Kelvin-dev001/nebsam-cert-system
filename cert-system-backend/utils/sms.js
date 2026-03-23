@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 // The two fixed phone numbers (format: 2547XXXXXXXX)
-const OTP_NUMBERS = ['254759293030'];
+const OTP_NUMBERS = ['254706707494'];
 
 // Onfon API credentials from .env
 const ONFON_API_URL = process.env.ONFON_API_URL || 'https://api.onfonmedia.co.ke/v1/sms/SendBulkSMS';
