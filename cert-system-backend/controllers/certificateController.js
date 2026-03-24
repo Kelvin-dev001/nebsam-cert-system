@@ -159,48 +159,264 @@ exports.shareCertificate = async (req, res) => {
       res.send(pdfData);
     });
 
-    const templatePath = process.env.CERT_TEMPLATE_PATH ||
-      path.join(__dirname, '../../frontend/public/certificate-template.png');
-    const format = d => (d ? d.toISOString().slice(0, 10) : '');
+    // ── Design tokens ─────────────────────────────────────────────────────
+    const NAVY = '#1B2A4A';
+    const GOLD = '#C5962A';
+    const PAGE_W = 595.28;
+    const MARGIN = 20;
+    const CONTENT_W = PAGE_W - MARGIN * 2;
 
-    // Draw full-page background template
+    // ── Register custom fonts ─────────────────────────────────────────────
+    const fontsDir = path.join(__dirname, '../../frontend/public/fonts/');
+    let loraFont = 'Helvetica';
+    let loraBoldFont = 'Helvetica-Bold';
+    let robotoFont = 'Helvetica';
     try {
-      doc.image(templatePath, 0, 0, { width: 595.28, height: 841.89 });
-    } catch (imgErr) {
-      console.warn(`[CERT PRINT] Template image not found at ${templatePath}, rendering without background.`);
+      doc.registerFont('Lora', path.join(fontsDir, 'Lora-Regular.ttf'));
+      doc.registerFont('Lora-Bold', path.join(fontsDir, 'Lora-Bold.ttf'));
+      doc.registerFont('Roboto', path.join(fontsDir, 'Roboto-Regular.ttf'));
+      loraFont = 'Lora';
+      loraBoldFont = 'Lora-Bold';
+      robotoFont = 'Roboto';
+    } catch (fontErr) {
+      console.warn('[CERT PRINT] Custom fonts unavailable, using Helvetica fallback.');
     }
 
-    // Overlay dynamic values at mapped coordinates (same as frontend)
-    doc.font('Helvetica').fontSize(10).fillColor('#111111');
-
+    const fmt = d => (d ? d.toISOString().slice(0, 10) : '\u2014');
     const isTracking = cert.type === 'tracking';
+    let y = 0;
 
-    // Certificate Details
-    doc.text(isTracking ? 'Vehicle Tracking Installation' : 'Radio Call Ownership', 62, 295);
-    doc.text(cert.certificateSerialNo || '', 62, 348);
-    doc.text(format(cert.dateOfIssue), 62, 393);
+    // ── HEADER (navy banner) ──────────────────────────────────────────────
+    doc.rect(0, 0, PAGE_W, 88).fill(NAVY);
 
-    // Owner Details
-    doc.text(cert.issuedTo || '', 62, 478);
-    doc.text(cert.idNumber || '', 62, 517);
-    doc.text(cert.phoneNumber || '', 62, 555);
+    // Logo
+    const logoPath = path.join(__dirname, '../../frontend/public/nebsam_logo.png');
+    try {
+      doc.image(logoPath, 60, 14, { height: 58 });
+    } catch (e) { /* logo missing — skip */ }
 
-    if (isTracking) {
-      // Vehicle Details — left column
-      doc.text(cert.vehicleRegNumber || '', 145, 635);
-      doc.text(cert.make || '', 62, 665);
-      doc.text(cert.bodyType || '', 130, 695);
+    // Brand name
+    doc.font(loraBoldFont).fontSize(26).fillColor('#FFFFFF')
+       .text('NEBSAM', 0, 22, { width: PAGE_W, align: 'center', characterSpacing: 3 });
 
-      // Vehicle Details — right column
-      doc.text(cert.deviceFittedWith || '', 355, 635);
-      doc.text(cert.imeiNo || '', 388, 668);
-      doc.text(cert.simNo || '', 388, 695);
-      doc.text(format(cert.dateOfInstallation), 415, 722);
-      doc.text(format(cert.expiryDate), 415, 748);
+    // Tagline
+    doc.font(robotoFont).fontSize(9).fillColor(GOLD)
+       .text('Smart Tracking & Telematics Solutions', 0, 56, { width: PAGE_W, align: 'center', characterSpacing: 1 });
+
+    y = 88;
+
+    // ── GOLD LINE ─────────────────────────────────────────────────────────
+    doc.rect(0, y, PAGE_W, 3).fill(GOLD);
+    y += 3;
+
+    // ── TITLE SECTION ─────────────────────────────────────────────────────
+    doc.rect(0, y, PAGE_W, 56).fill('#FAFAF6');
+
+    doc.font(loraBoldFont).fontSize(22).fillColor(NAVY)
+       .text('Certificate of Installation', 0, y + 12, { width: PAGE_W, align: 'center', characterSpacing: 1 });
+
+    doc.font(robotoFont).fontSize(13).fillColor(GOLD)
+       .text('\u25C6  \u25C6  \u25C6', 0, y + 38, { width: PAGE_W, align: 'center', characterSpacing: 8 });
+
+    y += 56;
+
+    // ── GOLD LINE ─────────────────────────────────────────────────────────
+    doc.rect(0, y, PAGE_W, 3).fill(GOLD);
+    y += 3;
+
+    // ── HELPER: draw section header bar ───────────────────────────────────
+    const drawSectionBar = (title, yPos) => {
+      doc.rect(MARGIN, yPos, CONTENT_W, 22).fill(NAVY);
+      doc.font(loraBoldFont).fontSize(10).fillColor('#FFFFFF')
+         .text(`\u25C6  ${title}  \u25C6`, MARGIN, yPos + 6, { width: CONTENT_W, align: 'center' });
+      return yPos + 22;
+    };
+
+    // ── HELPER: draw bordered section box outline ──────────────────────────
+    const drawSectionBoxBorder = (yTop, height) => {
+      doc.rect(MARGIN, yTop, CONTENT_W, height).stroke(NAVY);
+    };
+
+    // ── HELPER: draw a label: value row ───────────────────────────────────
+    const drawFieldRow = (label, value, xOffset, yPos, bold) => {
+      const LABEL_W = 85;
+      doc.font(loraBoldFont).fontSize(8.5).fillColor(NAVY)
+         .text(`${label}:`, xOffset, yPos, { width: LABEL_W, lineBreak: false });
+      if (bold) {
+        doc.font(loraBoldFont).fontSize(9).fillColor(NAVY)
+           .text(value || '\u2014', xOffset + LABEL_W + 4, yPos, { width: 140, lineBreak: false });
+      } else {
+        doc.font(robotoFont).fontSize(8.5).fillColor('#333')
+           .text(value || '\u2014', xOffset + LABEL_W + 4, yPos, { width: 140, lineBreak: false });
+      }
+      return yPos + 14;
+    };
+
+    // ── CERTIFICATE DETAILS SECTION ───────────────────────────────────────
+    y += 8; // top margin
+    y = drawSectionBar('Certificate Details', y);
+    const certBoxTop = y;
+    const certBoxPad = 10;
+    const leftColX = MARGIN + certBoxPad;
+    const rightColX = MARGIN + CONTENT_W / 2 + certBoxPad;
+
+    let leftY = y + certBoxPad;
+    let rightY = y + certBoxPad;
+
+    // Left column
+    leftY = drawFieldRow('Type', isTracking ? 'Vehicle Tracking Installation' : 'Radio Call Ownership', leftColX, leftY);
+    // Serial number with box
+    doc.font(loraBoldFont).fontSize(8.5).fillColor(NAVY)
+       .text('Serial No:', leftColX, leftY, { lineBreak: false });
+    const serialVal = cert.certificateSerialNo || '\u2014';
+    const snBoxX = leftColX + 89;
+    const snBoxW = 90;
+    doc.rect(snBoxX, leftY - 1, snBoxW, 15).stroke(NAVY);
+    doc.font(loraBoldFont).fontSize(10).fillColor(NAVY)
+       .text(serialVal, snBoxX + 4, leftY + 1, { width: snBoxW - 8, lineBreak: false });
+    leftY += 18;
+    leftY = drawFieldRow('Date of Issue', fmt(cert.dateOfIssue), leftColX, leftY);
+
+    // Right column — company info
+    doc.font(loraBoldFont).fontSize(9).fillColor(NAVY)
+       .text('Nebsam Digital Solutions (K) Ltd', rightColX, rightY, { width: CONTENT_W / 2 - certBoxPad * 2 });
+    rightY += 14;
+    doc.font(robotoFont).fontSize(7.5).fillColor('#555')
+       .text('P.O. Box 62330-00619 Nairobi | RG-8372897', rightColX, rightY, { width: CONTENT_W / 2 - certBoxPad * 2, lineBreak: false });
+    rightY += 12;
+    doc.font(robotoFont).fontSize(7.5).fillColor('#555')
+       .text('info@nebsam.co.ke | www.nebsam.co.ke', rightColX, rightY, { width: CONTENT_W / 2 - certBoxPad * 2, lineBreak: false });
+    rightY += 12;
+
+    const certBoxH = Math.max(leftY, rightY) - certBoxTop + certBoxPad;
+    drawSectionBoxBorder(certBoxTop, certBoxH);
+
+    // Vertical divider between columns
+    doc.moveTo(MARGIN + CONTENT_W / 2, certBoxTop + 4)
+       .lineTo(MARGIN + CONTENT_W / 2, certBoxTop + certBoxH - 4)
+       .strokeColor('#DDD').stroke();
+
+    y = certBoxTop + certBoxH;
+
+    // ── OWNER DETAILS SECTION ─────────────────────────────────────────────
+    y += 8;
+    y = drawSectionBar('Owner Details', y);
+    const ownerBoxTop = y;
+    let ownerY = y + certBoxPad;
+
+    ownerY = drawFieldRow('Issued To', cert.issuedTo, leftColX, ownerY);
+    ownerY = drawFieldRow('ID Number', cert.idNumber, leftColX, ownerY);
+    ownerY = drawFieldRow('Phone Number', cert.phoneNumber, leftColX, ownerY);
+
+    const ownerBoxH = ownerY - ownerBoxTop + certBoxPad;
+    drawSectionBoxBorder(ownerBoxTop, ownerBoxH);
+    y = ownerBoxTop + ownerBoxH;
+
+    // ── VEHICLE DETAILS SECTION ───────────────────────────────────────────
+    y += 8;
+    y = drawSectionBar('Vehicle Details', y);
+    const vehBoxTop = y;
+    let vLeftY = y + certBoxPad;
+    let vRightY = y + certBoxPad;
+
+    // Left column
+    vLeftY = drawFieldRow('Registration No', cert.vehicleRegNumber, leftColX, vLeftY, true);
+    vLeftY = drawFieldRow('Make', cert.make, leftColX, vLeftY);
+    vLeftY = drawFieldRow('Body Type', cert.bodyType, leftColX, vLeftY);
+
+    // Right column
+    vRightY = drawFieldRow('Device Fitted', cert.deviceFittedWith, rightColX, vRightY, true);
+    vRightY = drawFieldRow('IMEI No', cert.imeiNo, rightColX, vRightY);
+    vRightY = drawFieldRow('SIM No', cert.simNo, rightColX, vRightY);
+
+    // Install date — amber highlight
+    doc.rect(rightColX + 89, vRightY - 1, 100, 14).fill('#FFF8E1');
+    doc.font(loraBoldFont).fontSize(8.5).fillColor(NAVY)
+       .text('Install Date:', rightColX, vRightY, { width: 89, lineBreak: false });
+    doc.font(loraBoldFont).fontSize(8.5).fillColor('#7A5800')
+       .text(fmt(cert.dateOfInstallation), rightColX + 93, vRightY, { width: 96, lineBreak: false });
+    vRightY += 14;
+
+    // Expiry date — red highlight
+    doc.rect(rightColX + 89, vRightY - 1, 100, 14).fill('#FFE8E8');
+    doc.font(loraBoldFont).fontSize(8.5).fillColor(NAVY)
+       .text('Expiry Date:', rightColX, vRightY, { width: 89, lineBreak: false });
+    doc.font(loraBoldFont).fontSize(8.5).fillColor('#B00000')
+       .text(fmt(cert.expiryDate), rightColX + 93, vRightY, { width: 96, lineBreak: false });
+    vRightY += 14;
+
+    const vBoxH = Math.max(vLeftY, vRightY) - vehBoxTop + certBoxPad;
+    drawSectionBoxBorder(vehBoxTop, vBoxH);
+
+    // Vertical divider
+    doc.moveTo(MARGIN + CONTENT_W / 2, vehBoxTop + 4)
+       .lineTo(MARGIN + CONTENT_W / 2, vehBoxTop + vBoxH - 4)
+       .strokeColor('#DDD').stroke();
+
+    y = vehBoxTop + vBoxH;
+
+    // ── BOTTOM SECTION ────────────────────────────────────────────────────
+    y += 10;
+    const bottomY = y;
+
+    // Fitted By + Signature
+    doc.font(robotoFont).fontSize(8).fillColor('#555')
+       .text('Fitted By:', MARGIN + 8, bottomY, { lineBreak: false });
+    doc.font(loraBoldFont).fontSize(10).fillColor(NAVY)
+       .text('Dennis Karani', MARGIN + 8, bottomY + 13, { lineBreak: false });
+
+    const sigPath = path.join(__dirname, '../../frontend/public/assets/signature.png');
+    try {
+      doc.image(sigPath, MARGIN + 8, bottomY + 27, { width: 85, height: 38 });
+    } catch (e) { /* signature image missing — skip */ }
+
+    doc.font(robotoFont).fontSize(7.5).fillColor('#666')
+       .text('Authorized Installer', MARGIN + 8, bottomY + 68, { lineBreak: false });
+    doc.moveTo(MARGIN + 8, bottomY + 66)
+       .lineTo(MARGIN + 108, bottomY + 66)
+       .strokeColor('#aaa').lineWidth(0.5).stroke();
+
+    // Official Stamp box (dashed)
+    const stampX = MARGIN + 130;
+    doc.rect(stampX, bottomY + 5, 88, 68)
+       .dash(3, { space: 3 }).strokeColor(NAVY).lineWidth(1.5).stroke();
+    doc.undash();
+    doc.font(robotoFont).fontSize(7).fillColor('#999')
+       .text('Official\nCompany\nStamp', stampX + 10, bottomY + 22, { width: 68, align: 'center' });
+
+    // Certification badges row
+    const badgeX = MARGIN + 240;
+    doc.font(robotoFont).fontSize(7).fillColor('#666')
+       .text('Certified By:', badgeX + 20, bottomY, { lineBreak: false });
+
+    // NTSA placeholder badge (navy circle, radius=25, centered at badgeX+25, bottomY+36)
+    doc.circle(badgeX + 25, bottomY + 36, 25).fill(NAVY);
+    doc.font(loraBoldFont).fontSize(7).fillColor('#FFFFFF')
+       .text('NTSA\nCertified', badgeX + 8, bottomY + 26, { width: 34, align: 'center' });
+
+    const kebsBadge = path.join(__dirname, '../../frontend/public/assets/kebs-badge.png');
+    try {
+      doc.image(kebsBadge, badgeX + 56, bottomY + 11, { width: 50, height: 50 });
+    } catch (e) {
+      console.warn('[CERT PRINT] kebs-badge.png missing from frontend/public/assets/ — badge skipped.');
     }
 
-    // Bottom — Fitted By (hardcoded)
-    doc.text('Dennis Karani', 100, 778);
+    const odpcBadge = path.join(__dirname, '../../frontend/public/assets/odpc-badge.png');
+    try {
+      doc.image(odpcBadge, badgeX + 112, bottomY + 11, { width: 50, height: 50 });
+    } catch (e) {
+      console.warn('[CERT PRINT] odpc-badge.png missing from frontend/public/assets/ — badge skipped.');
+    }
+
+    // ── FOOTER ────────────────────────────────────────────────────────────
+    const footerY = 800;
+    doc.rect(0, footerY, PAGE_W, 41.89).fill(NAVY);
+    doc.font(robotoFont).fontSize(7).fillColor('#FFFFFF')
+       .text(
+         'This is a computer-generated certificate issued by Nebsam Digital Solutions (K) Ltd.\nNo signature is required.',
+         MARGIN, footerY + 12,
+         { width: CONTENT_W, align: 'center' }
+       );
 
     doc.end();
     console.log(`[CERT PRINT SUCCESS] CertID: ${cert._id}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);

@@ -1,141 +1,422 @@
 import React from "react";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
-/*
-  CertificateHtmlPreview.js
-  - Visible HTML preview for on-screen preview before PDF download.
-  - Uses certificate-template.png as a full-page background image with
-    CSS absolutely-positioned overlays for dynamic values.
-*/
+// ── Design tokens (must match CertificateDocument.js) ──────────────────────
+const NAVY = "#1B2A4A";
+const GOLD = "#C5962A";
+const WHITE = "#FFFFFF";
+const LIGHT_BG = "#F4F1EC";
 
-// A4 aspect ratio: 595.28 / 841.89 ≈ 0.7071
-// We render the preview at a fixed width and scale coordinates proportionally.
-const TEMPLATE_W = 595.28;
-const TEMPLATE_H = 841.89;
-
-const CertificateHtmlPreview = ({ cert = {}, qrDataUrl = null }) => {
-  const format = (d) => (d ? d.slice(0, 10) : "");
-
+// ── Helper: section header bar ──────────────────────────────────────────────
+function SectionHeader({ title }) {
   return (
     <Box
       sx={{
-        position: "relative",
-        width: "100%",
-        paddingBottom: `${(TEMPLATE_H / TEMPLATE_W) * 100}%`,
-        overflow: "hidden",
-        background: "#fff",
-        boxShadow: 3,
+        backgroundColor: NAVY,
+        py: 0.75,
+        px: 1.5,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 1,
       }}
     >
-      {/* Background template image */}
-      <Box
-        component="img"
-        src="/certificate-template.png"
-        alt="certificate template"
+      <Typography sx={{ color: GOLD, fontSize: "11px", lineHeight: 1 }}>&#9670;</Typography>
+      <Typography
         sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "fill",
-          display: "block",
+          color: WHITE,
+          fontFamily: "'Lora', serif",
+          fontWeight: 700,
+          fontSize: "12px",
+          letterSpacing: "0.5px",
         }}
-      />
-
-      {/* Dynamic overlays — coordinates expressed as % of template dimensions */}
-      {/* Certificate Details */}
-      <Val x={62} y={295} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {cert.type === "tracking" ? "Vehicle Tracking Installation" : "Radio Call Ownership"}
-      </Val>
-      <Val x={62} y={348} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {cert.certificateSerialNo || ""}
-      </Val>
-      <Val x={62} y={393} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {format(cert.dateOfIssue)}
-      </Val>
-
-      {/* Owner Details */}
-      <Val x={62} y={478} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {cert.issuedTo || ""}
-      </Val>
-      <Val x={62} y={517} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {cert.idNumber || ""}
-      </Val>
-      <Val x={62} y={555} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {cert.phoneNumber || ""}
-      </Val>
-
-      {/* Vehicle Details — left column */}
-      <Val x={145} y={635} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {cert.vehicleRegNumber || ""}
-      </Val>
-      <Val x={62} y={665} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {cert.make || ""}
-      </Val>
-      <Val x={130} y={695} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {cert.bodyType || ""}
-      </Val>
-
-      {/* Vehicle Details — right column */}
-      <Val x={355} y={635} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {cert.deviceFittedWith || ""}
-      </Val>
-      <Val x={388} y={668} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {cert.imeiNo || ""}
-      </Val>
-      <Val x={388} y={695} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {cert.simNo || ""}
-      </Val>
-      <Val x={415} y={722} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {format(cert.dateOfInstallation)}
-      </Val>
-      <Val x={415} y={748} w={TEMPLATE_W} h={TEMPLATE_H}>
-        {format(cert.expiryDate)}
-      </Val>
-
-      {/* Bottom — Fitted By */}
-      <Val x={100} y={778} w={TEMPLATE_W} h={TEMPLATE_H}>
-        Dennis Karani
-      </Val>
-
-      {/* QR Code */}
-      {qrDataUrl && (
-        <Box
-          component="img"
-          src={qrDataUrl}
-          alt="qr"
-          sx={{
-            position: "absolute",
-            left: `${(458 / TEMPLATE_W) * 100}%`,
-            top: `${(750 / TEMPLATE_H) * 100}%`,
-            width: `${(80 / TEMPLATE_W) * 100}%`,
-          }}
-        />
-      )}
-    </Box>
-  );
-};
-
-// Helper: render a value at absolute coordinates scaled to template dimensions
-function Val({ x, y, w, h, children }) {
-  return (
-    <Box
-      sx={{
-        position: "absolute",
-        left: `${(x / w) * 100}%`,
-        top: `${(y / h) * 100}%`,
-        fontSize: "clamp(8px, 1.2vw, 11px)",
-        color: "#111",
-        fontFamily: "Roboto, sans-serif",
-        fontWeight: 600,
-        whiteSpace: "nowrap",
-        lineHeight: 1,
-      }}
-    >
-      {children}
+      >
+        {title}
+      </Typography>
+      <Typography sx={{ color: GOLD, fontSize: "11px", lineHeight: 1 }}>&#9670;</Typography>
     </Box>
   );
 }
+
+// ── Helper: field row ───────────────────────────────────────────────────────
+function FieldRow({ label, value, bold }) {
+  return (
+    <Box sx={{ display: "flex", mb: 0.6, alignItems: "flex-start" }}>
+      <Typography
+        sx={{
+          fontFamily: "'Lora', serif",
+          fontWeight: 700,
+          fontSize: "10px",
+          color: NAVY,
+          width: 100,
+          flexShrink: 0,
+        }}
+      >
+        {label}
+      </Typography>
+      <Typography sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "10px", color: NAVY, mr: 0.5 }}>
+        :
+      </Typography>
+      <Typography
+        sx={{
+          fontFamily: bold ? "'Lora', serif" : "'Roboto', sans-serif",
+          fontWeight: bold ? 700 : 400,
+          fontSize: "10px",
+          color: bold ? NAVY : "#333",
+          flex: 1,
+        }}
+      >
+        {value || "\u2014"}
+      </Typography>
+    </Box>
+  );
+}
+
+// ── Main component ──────────────────────────────────────────────────────────
+// NOTE: The following image files must be placed in frontend/public/assets/:
+//   - signature.png   (authorized installer signature)
+//   - kebs-badge.png  (KEBS Standardization Mark)
+//   - odpc-badge.png  (Office of the Data Protection Commissioner)
+// See frontend/public/assets/README.md for details.
+const CertificateHtmlPreview = ({ cert = {}, qrDataUrl = null }) => {
+  const fmt = (d) => (d ? String(d).slice(0, 10) : "\u2014");
+  const isTracking = cert.type === "tracking";
+
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: 820,
+        mx: "auto",
+        backgroundColor: LIGHT_BG,
+        boxShadow: "0 4px 24px rgba(0,0,0,0.25)",
+        fontFamily: "'Roboto', sans-serif",
+        fontSize: "10px",
+      }}
+    >
+      {/* ── HEADER ──────────────────────────────────────────────────── */}
+      <Box
+        sx={{
+          backgroundColor: NAVY,
+          py: 2,
+          px: 3,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 2,
+        }}
+      >
+        <Box
+          component="img"
+          src="/nebsam_logo.png"
+          alt="Nebsam logo"
+          sx={{ width: 72, height: 72, objectFit: "contain" }}
+        />
+        <Box sx={{ textAlign: "center" }}>
+          <Typography
+            sx={{
+              fontFamily: "'Lora', serif",
+              fontWeight: 700,
+              fontSize: "30px",
+              color: WHITE,
+              letterSpacing: "4px",
+            }}
+          >
+            NEBSAM
+          </Typography>
+          <Typography
+            sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "11px", color: GOLD, letterSpacing: "1px", mt: 0.4 }}
+          >
+            Smart Tracking &amp; Telematics Solutions
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Gold divider */}
+      <Box sx={{ height: 4, backgroundColor: GOLD }} />
+
+      {/* ── TITLE ───────────────────────────────────────────────────── */}
+      <Box sx={{ backgroundColor: "#FAFAF6", py: 2, textAlign: "center" }}>
+        <Typography
+          sx={{
+            fontFamily: "'Lora', serif",
+            fontWeight: 700,
+            fontSize: "26px",
+            color: NAVY,
+            letterSpacing: "1px",
+          }}
+        >
+          Certificate of Installation
+        </Typography>
+        <Typography sx={{ color: GOLD, fontSize: "16px", mt: 0.6, letterSpacing: "10px" }}>
+          &#9670;&#9670;&#9670;
+        </Typography>
+      </Box>
+
+      {/* Gold divider */}
+      <Box sx={{ height: 4, backgroundColor: GOLD }} />
+
+      {/* ── CERTIFICATE DETAILS ─────────────────────────────────────── */}
+      <Box sx={{ mx: 2.5, mt: 1.5, mb: 1 }}>
+        <SectionHeader title="Certificate Details" />
+        <Box
+          sx={{
+            border: `1px solid ${NAVY}`,
+            borderTop: "none",
+            backgroundColor: WHITE,
+            p: 1.5,
+            display: "flex",
+            gap: 2,
+          }}
+        >
+          {/* Left: type, serial, date */}
+          <Box sx={{ flex: 1, borderRight: `1px solid #DDD`, pr: 2 }}>
+            <FieldRow
+              label="Type"
+              value={isTracking ? "Vehicle Tracking Installation" : "Radio Call Ownership"}
+            />
+            {/* Serial number in a bordered box */}
+            <Box sx={{ display: "flex", mb: 0.6, alignItems: "center" }}>
+              <Typography
+                sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "10px", color: NAVY, width: 100, flexShrink: 0 }}
+              >
+                Serial No
+              </Typography>
+              <Typography sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "10px", color: NAVY, mr: 0.5 }}>:</Typography>
+              <Box sx={{ border: `1px solid ${NAVY}`, px: 1, py: 0.2 }}>
+                <Typography sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "13px", color: NAVY }}>
+                  {cert.certificateSerialNo || "\u2014"}
+                </Typography>
+              </Box>
+            </Box>
+            <FieldRow label="Date of Issue" value={fmt(cert.dateOfIssue)} />
+          </Box>
+
+          {/* Right: company info + small QR */}
+          <Box sx={{ flex: 1, pl: 1 }}>
+            <Typography
+              sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "10px", color: NAVY, mb: 0.5 }}
+            >
+              Nebsam Digital Solutions (K) Ltd
+            </Typography>
+            <Typography sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "9px", color: "#555", mb: 0.25 }}>
+              P.O. Box 62330-00619 Nairobi | RG-8372897
+            </Typography>
+            <Typography sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "9px", color: "#555", mb: 0.25 }}>
+              info@nebsam.co.ke
+            </Typography>
+            <Typography sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "9px", color: "#555", mb: 0.5 }}>
+              www.nebsam.co.ke
+            </Typography>
+            {qrDataUrl && (
+              <Box component="img" src={qrDataUrl} alt="qr" sx={{ width: 60, height: 60 }} />
+            )}
+          </Box>
+        </Box>
+      </Box>
+
+      {/* ── OWNER DETAILS ───────────────────────────────────────────── */}
+      <Box sx={{ mx: 2.5, mb: 1 }}>
+        <SectionHeader title="Owner Details" />
+        <Box sx={{ border: `1px solid ${NAVY}`, borderTop: "none", backgroundColor: WHITE, p: 1.5 }}>
+          <FieldRow label="Issued To" value={cert.issuedTo} />
+          <FieldRow label="ID Number" value={cert.idNumber} />
+          <FieldRow label="Phone Number" value={cert.phoneNumber} />
+        </Box>
+      </Box>
+
+      {/* ── VEHICLE DETAILS ─────────────────────────────────────────── */}
+      <Box sx={{ mx: 2.5, mb: 1 }}>
+        <SectionHeader title="Vehicle Details" />
+        <Box
+          sx={{
+            border: `1px solid ${NAVY}`,
+            borderTop: "none",
+            backgroundColor: WHITE,
+            p: 1.5,
+            display: "flex",
+            gap: 2,
+          }}
+        >
+          {/* Left: registration, make, body type */}
+          <Box sx={{ flex: 1, borderRight: `1px solid #DDD`, pr: 2 }}>
+            <FieldRow label="Registration No" value={cert.vehicleRegNumber} bold />
+            <FieldRow label="Make" value={cert.make} />
+            <FieldRow label="Body Type" value={cert.bodyType} />
+          </Box>
+
+          {/* Right: device, IMEI, SIM, dates */}
+          <Box sx={{ flex: 1, pl: 1 }}>
+            <FieldRow label="Device Fitted" value={cert.deviceFittedWith} bold />
+            <FieldRow label="IMEI No" value={cert.imeiNo} />
+            <FieldRow label="SIM No" value={cert.simNo} />
+
+            {/* Installation date — amber highlight */}
+            <Box sx={{ display: "flex", mb: 0.6, alignItems: "center" }}>
+              <Typography
+                sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "10px", color: NAVY, width: 100, flexShrink: 0 }}
+              >
+                Install Date
+              </Typography>
+              <Typography sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "10px", color: NAVY, mr: 0.5 }}>:</Typography>
+              <Box sx={{ backgroundColor: "#FFF8E1", px: 0.75, py: 0.2, flex: 1 }}>
+                <Typography sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "10px", color: "#7A5800" }}>
+                  {fmt(cert.dateOfInstallation)}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Expiry date — red highlight */}
+            <Box sx={{ display: "flex", mb: 0.6, alignItems: "center" }}>
+              <Typography
+                sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "10px", color: NAVY, width: 100, flexShrink: 0 }}
+              >
+                Expiry Date
+              </Typography>
+              <Typography sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "10px", color: NAVY, mr: 0.5 }}>:</Typography>
+              <Box sx={{ backgroundColor: "#FFE8E8", px: 0.75, py: 0.2, flex: 1 }}>
+                <Typography sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "10px", color: "#B00000" }}>
+                  {fmt(cert.expiryDate)}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      {/* ── BOTTOM SECTION ──────────────────────────────────────────── */}
+      <Box
+        sx={{
+          mx: 2.5,
+          mt: 1,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+        }}
+      >
+        {/* Fitted By + Signature */}
+        <Box sx={{ width: 130, display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <Typography sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "9px", color: "#555", mb: 0.25 }}>
+            Fitted By:
+          </Typography>
+          <Typography sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "11px", color: NAVY, mb: 0.5 }}>
+            Dennis Karani
+          </Typography>
+          <Box
+            component="img"
+            src="/assets/signature.png"
+            alt="Authorized Installer Signature"
+            sx={{ width: 90, height: 40, objectFit: "contain", mb: 0.5 }}
+          />
+          <Typography
+            sx={{
+              fontFamily: "'Roboto', sans-serif",
+              fontSize: "9px",
+              color: "#666",
+              borderTop: "1px solid #aaa",
+              pt: 0.25,
+              textAlign: "center",
+              width: 110,
+            }}
+          >
+            Authorized Installer
+          </Typography>
+        </Box>
+
+        {/* Official Company Stamp */}
+        <Box sx={{ width: 105, display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <Box
+            sx={{
+              border: `1.5px dashed ${NAVY}`,
+              width: 90,
+              height: 72,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Typography sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "8px", color: "#999", textAlign: "center" }}>
+              Official<br />Company<br />Stamp
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Certification badges */}
+        <Box sx={{ width: 185, display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <Typography sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "8px", color: "#666", mb: 0.75 }}>
+            Certified By:
+          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {/* NTSA styled placeholder badge */}
+            <Box
+              sx={{
+                width: 52,
+                height: 52,
+                backgroundColor: NAVY,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Typography
+                sx={{
+                  fontFamily: "'Lora', serif",
+                  fontWeight: 700,
+                  fontSize: "8px",
+                  color: WHITE,
+                  textAlign: "center",
+                  lineHeight: 1.3,
+                }}
+              >
+                NTSA<br />Certified
+              </Typography>
+            </Box>
+            <Box component="img" src="/assets/kebs-badge.png" alt="KEBS" sx={{ width: 52, height: 52, objectFit: "contain" }} />
+            <Box component="img" src="/assets/odpc-badge.png" alt="ODPC" sx={{ width: 52, height: 52, objectFit: "contain" }} />
+          </Box>
+        </Box>
+
+        {/* QR Code */}
+        <Box sx={{ width: 95, display: "flex", flexDirection: "column", alignItems: "center" }}>
+          {qrDataUrl && (
+            <>
+              <Box component="img" src={qrDataUrl} alt="QR code" sx={{ width: 72, height: 72 }} />
+              <Typography
+                sx={{
+                  fontFamily: "'Roboto', sans-serif",
+                  fontSize: "8px",
+                  color: "#666",
+                  textAlign: "center",
+                  mt: 0.5,
+                  lineHeight: 1.3,
+                }}
+              >
+                Scan to Verify<br />Certificate
+              </Typography>
+            </>
+          )}
+        </Box>
+      </Box>
+
+      {/* ── FOOTER ──────────────────────────────────────────────────── */}
+      <Box sx={{ backgroundColor: NAVY, py: 1.2, px: 3, mt: 1.5 }}>
+        <Typography
+          sx={{
+            fontFamily: "'Roboto', sans-serif",
+            fontSize: "9px",
+            color: WHITE,
+            textAlign: "center",
+            lineHeight: 1.5,
+          }}
+        >
+          This is a computer-generated certificate issued by Nebsam Digital Solutions (K) Ltd.
+          <br />No signature is required.
+        </Typography>
+      </Box>
+    </Box>
+  );
+};
 
 export default CertificateHtmlPreview;
