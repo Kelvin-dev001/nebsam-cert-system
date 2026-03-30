@@ -50,8 +50,8 @@ router.delete("/:id", auth, certificateController.deleteCertificate);
 router.post("/:id/email", auth, certificateController.emailCertificate);
 
 // WhatsApp share
-router.post("/:id/whatsapp", auth, actionLimiter, certificateController.whatsappCertificate);
+router.post("/:id/whatsapp", actionLimiter, auth, certificateController.whatsappCertificate);
 
-router.post("/:id/share", auth, actionLimiter, certificateController.shareCertificate);
+router.post("/:id/share", actionLimiter, auth, certificateController.shareCertificate);
 
 module.exports = router;
