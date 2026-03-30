@@ -130,8 +130,50 @@ exports.emailCertificate = async (req, res) => {
 };
 
 exports.whatsappCertificate = async (req, res) => {
-  console.log(`[WHATSAPP CERT] CertID: ${req.params.id}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}`);
-  res.json({ msg: "Certificate shared via WhatsApp (stub implementation)" });
+  try {
+    const cert = await Certificate.findById(req.params.id);
+    if (!cert) {
+      return res.status(404).json({ msg: "Certificate not found" });
+    }
+    if (req.user.role !== "admin" && String(cert.createdBy) !== req.user.id) {
+      return res.status(403).json({ msg: "Not authorized" });
+    }
+
+    const { phone } = req.body;
+    const rawPhone = (phone || cert.phoneNumber || "").replace(/[^0-9]/g, "");
+    const fmt = d => (d ? new Date(d).toISOString().slice(0, 10) : "—");
+
+    const verificationUrl = `${process.env.FRONTEND_URL || "https://nebsamdigital.com"}/certificates/${cert._id}/preview`;
+
+    const lines = [
+      "*NEBSAM Certificate of Installation*",
+      "━━━━━━━━━━━━━━━━━━━━━━━",
+      `📋 Serial No: ${cert.certificateSerialNo || "—"}`,
+      `👤 Issued To: ${cert.issuedTo || "—"}`,
+      `📅 Date of Issue: ${fmt(cert.dateOfIssue)}`,
+    ];
+
+    if (cert.type === "tracking") {
+      lines.push(`🚗 Vehicle Reg: ${cert.vehicleRegNumber || "—"}`);
+      lines.push(`🔧 Device: ${cert.deviceFittedWith || "—"}`);
+      lines.push(`📅 Installation: ${fmt(cert.dateOfInstallation)}`);
+      lines.push(`⚠️  Expiry: ${fmt(cert.expiryDate)}`);
+    }
+
+    lines.push("━━━━━━━━━━━━━━━━━━━━━━━");
+    lines.push(`🔗 View Certificate: ${verificationUrl}`);
+
+    const message = lines.join("\n");
+    const waUrl = rawPhone
+      ? `https://wa.me/${rawPhone}?text=${encodeURIComponent(message)}`
+      : `https://wa.me/?text=${encodeURIComponent(message)}`;
+
+    console.log(`[WHATSAPP CERT] CertID: ${cert._id}, UserID: ${req.user.id}, Phone: ${rawPhone}, Time: ${new Date().toISOString()}`);
+    res.json({ waUrl, message });
+  } catch (err) {
+    console.error(`[WHATSAPP CERT ERROR] CertID: ${req.params.id}, UserID: ${req.user.id}, Time: ${new Date().toISOString()}, Error: ${err.message}`);
+    res.status(500).json({ msg: "Server error", error: err.message });
+  }
 };
 
 // --- REMOVED approval OTP routes and logic ---

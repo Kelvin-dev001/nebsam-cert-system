@@ -441,7 +441,7 @@ const CertificateDocument = ({ cert = {}, qr = null }) => {
           <Image style={S.logo} src="/nebsam_logo.png" />
           <View style={S.headerTextWrap}>
             <Text style={S.headerBrand}>NEBSAM</Text>
-            <Text style={S.headerTagline}>We Are The Solutions</Text>
+            <Text style={S.headerTagline}>Smart Tracking &amp; Telematics Solutions</Text>
           </View>
         </View>
 
@@ -481,9 +481,9 @@ const CertificateDocument = ({ cert = {}, qr = null }) => {
               {/* Right: company info + small QR */}
               <View style={S.colRight}>
                 <Text style={S.companyName}>Nebsam Digital Solutions (K) Ltd</Text>
-                <Text style={S.companyDetail}>HQ-MSA Makupa Roundabout Nxt To Mass Petrol Station</Text>
-                <Text style={S.companyDetail}>info@nebsamdigital.com</Text>
-                <Text style={S.companyDetail}>www.nebsamdigital.com</Text>
+                <Text style={S.companyDetail}>P.O. Box 62330-00619 Nairobi | RG-8372897</Text>
+                <Text style={S.companyDetail}>info@nebsam.co.ke</Text>
+                <Text style={S.companyDetail}>www.nebsam.co.ke</Text>
                 {qr && <Image style={S.qrSmall} src={qr} />}
               </View>
             </View>
@@ -557,8 +557,6 @@ const CertificateDocument = ({ cert = {}, qr = null }) => {
           <View style={S.badgesCol}>
             <Text style={S.badgesLabel}>Certified By:</Text>
             <View style={S.badgesRow}>
-              {/* NTSA: styled placeholder (replace with Image when ntsa-badge.png is available) */}
-      
               <Image style={S.badge} src="/assets/kebs-badge.png" />
               <Image style={S.badge} src="/assets/odpc-badge.png" />
               <Image style={S.badge} src="/assets/cak-badge.png" />
