@@ -66,7 +66,7 @@ function FieldRow({ label, value, bold }) {
           flex: 1,
         }}
       >
-        {value || "\u2014"}
+        {value || ""}
       </Typography>
     </Box>
   );
@@ -79,7 +79,7 @@ function FieldRow({ label, value, bold }) {
 //   - odpc-badge.png  (Office of the Data Protection Commissioner)
 // See frontend/public/assets/README.md for details.
 const CertificateHtmlPreview = ({ cert = {}, qrDataUrl = null }) => {
-  const fmt = (d) => (d ? String(d).slice(0, 10) : "\u2014");
+  const fmt = (d) => (d ? String(d).slice(0, 10) : "");
   const isTracking = cert.type === "tracking";
 
   return (
@@ -185,7 +185,7 @@ const CertificateHtmlPreview = ({ cert = {}, qrDataUrl = null }) => {
               <Typography sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "10px", color: NAVY, mr: 0.5 }}>:</Typography>
               <Box sx={{ border: `1px solid ${NAVY}`, px: 1, py: 0.2 }}>
                 <Typography sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "13px", color: NAVY }}>
-                  {cert.certificateSerialNo || "\u2014"}
+                  {cert.certificateSerialNo || ""}
                 </Typography>
               </Box>
             </Box>
@@ -343,7 +343,7 @@ const CertificateHtmlPreview = ({ cert = {}, qrDataUrl = null }) => {
 
         {/* Certification badges */}
         <Box sx={{ width: 185, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <Typography sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "8px", color: "#666", mb: 0.75 }}>
+          <Typography sx={{ fontFamily: "'Lora', serif", fontWeight: 700, fontSize: "12px", color: NAVY, mb: 0.75 }}>
             Certified By:
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>

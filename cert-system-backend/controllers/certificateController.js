@@ -141,21 +141,21 @@ exports.whatsappCertificate = async (req, res) => {
 
     const { phone } = req.body;
     const rawPhone = (phone || cert.phoneNumber || "").replace(/[^0-9]/g, "");
-    const fmt = d => (d ? new Date(d).toISOString().slice(0, 10) : "—");
+    const fmt = d => (d ? new Date(d).toISOString().slice(0, 10) : "");
 
     const verificationUrl = `${process.env.FRONTEND_URL || "https://nebsamdigital.com"}/certificates/${cert._id}/preview`;
 
     const lines = [
       "*NEBSAM Certificate of Installation*",
       "━━━━━━━━━━━━━━━━━━━━━━━",
-      `📋 Serial No: ${cert.certificateSerialNo || "—"}`,
-      `👤 Issued To: ${cert.issuedTo || "—"}`,
+      `📋 Serial No: ${cert.certificateSerialNo || ""}`,
+      `👤 Issued To: ${cert.issuedTo || ""}`,
       `📅 Date of Issue: ${fmt(cert.dateOfIssue)}`,
     ];
 
     if (cert.type === "tracking") {
-      lines.push(`🚗 Vehicle Reg: ${cert.vehicleRegNumber || "—"}`);
-      lines.push(`🔧 Device: ${cert.deviceFittedWith || "—"}`);
+      lines.push(`🚗 Vehicle Reg: ${cert.vehicleRegNumber || ""}`);
+      lines.push(`🔧 Device: ${cert.deviceFittedWith || ""}`);
       lines.push(`📅 Installation: ${fmt(cert.dateOfInstallation)}`);
       lines.push(`⚠️  Expiry: ${fmt(cert.expiryDate)}`);
     }
@@ -224,7 +224,7 @@ exports.shareCertificate = async (req, res) => {
       console.warn('[CERT PRINT] Custom fonts unavailable, using Helvetica fallback.');
     }
 
-    const fmt = d => (d ? d.toISOString().slice(0, 10) : '\u2014');
+    const fmt = d => (d ? d.toISOString().slice(0, 10) : '');
     const isTracking = cert.type === 'tracking';
     let y = 0;
 
@@ -286,10 +286,10 @@ exports.shareCertificate = async (req, res) => {
          .text(`${label}:`, xOffset, yPos, { width: LABEL_W, lineBreak: false });
       if (bold) {
         doc.font(loraBoldFont).fontSize(9).fillColor(NAVY)
-           .text(value || '\u2014', xOffset + LABEL_W + 4, yPos, { width: 140, lineBreak: false });
+           .text(value || '', xOffset + LABEL_W + 4, yPos, { width: 140, lineBreak: false });
       } else {
         doc.font(robotoFont).fontSize(8.5).fillColor('#333')
-           .text(value || '\u2014', xOffset + LABEL_W + 4, yPos, { width: 140, lineBreak: false });
+           .text(value || '', xOffset + LABEL_W + 4, yPos, { width: 140, lineBreak: false });
       }
       return yPos + 14;
     };
@@ -310,7 +310,7 @@ exports.shareCertificate = async (req, res) => {
     // Serial number with box
     doc.font(loraBoldFont).fontSize(8.5).fillColor(NAVY)
        .text('Serial No:', leftColX, leftY, { lineBreak: false });
-    const serialVal = cert.certificateSerialNo || '\u2014';
+    const serialVal = cert.certificateSerialNo || '';
     const snBoxX = leftColX + 89;
     const snBoxW = 90;
     doc.rect(snBoxX, leftY - 1, snBoxW, 15).stroke(NAVY);
@@ -410,7 +410,7 @@ exports.shareCertificate = async (req, res) => {
     const sigPath = path.join(__dirname, '../../frontend/public/assets/signature.png');
     try {
       doc.image(sigPath, MARGIN + 8, bottomY + 27, { width: 85, height: 38 });
-    } catch (e) { /* signature image missing — skip */ }
+    } catch (e) { console.warn('[CERT PRINT] signature.png missing from frontend/public/assets/ — signature skipped.', e.message); }
 
     doc.font(robotoFont).fontSize(7.5).fillColor('#666')
        .text('Authorized Installer', MARGIN + 8, bottomY + 68, { lineBreak: false });
@@ -428,7 +428,7 @@ exports.shareCertificate = async (req, res) => {
 
     // Certification badges row
     const badgeX = MARGIN + 240;
-    doc.font(robotoFont).fontSize(7).fillColor('#666')
+    doc.font(loraBoldFont).fontSize(10).fillColor(NAVY)
        .text('Certified By:', badgeX + 20, bottomY, { lineBreak: false });
 
     // NTSA placeholder badge (navy circle, radius=25, centered at badgeX+25, bottomY+36)
