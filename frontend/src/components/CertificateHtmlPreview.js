@@ -108,7 +108,7 @@ const CertificateHtmlPreview = ({ cert = {}, qrDataUrl = null }) => {
       >
         <Box
           component="img"
-          src="/nebsam_logo.png"
+          src="/nebsam-logo.png"
           alt="Nebsam logo"
           sx={{ width: 72, height: 72, objectFit: "contain" }}
         />
@@ -127,7 +127,7 @@ const CertificateHtmlPreview = ({ cert = {}, qrDataUrl = null }) => {
           <Typography
             sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "11px", color: GOLD, letterSpacing: "1px", mt: 0.4 }}
           >
-            Smart Tracking &amp; Telematics Solutions
+           We Are The Solutions
           </Typography>
         </Box>
       </Box>
@@ -200,13 +200,13 @@ const CertificateHtmlPreview = ({ cert = {}, qrDataUrl = null }) => {
               Nebsam Digital Solutions (K) Ltd
             </Typography>
             <Typography sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "9px", color: "#555", mb: 0.25 }}>
-              P.O. Box 62330-00619 Nairobi | RG-8372897
+             hQ-MSA Makupa Roundabout Nxt To Mass Petrolstation | 0759000111
             </Typography>
             <Typography sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "9px", color: "#555", mb: 0.25 }}>
-              info@nebsam.co.ke
+              info@nebsamdigital.com
             </Typography>
             <Typography sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "9px", color: "#555", mb: 0.5 }}>
-              www.nebsam.co.ke
+              www.nebsamdigital.com
             </Typography>
             {qrDataUrl && (
               <Box component="img" src={qrDataUrl} alt="qr" sx={{ width: 60, height: 60 }} />
