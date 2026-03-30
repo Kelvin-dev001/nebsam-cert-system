@@ -1,9 +1,19 @@
 const express = require("express");
 const { check } = require("express-validator");
+const rateLimit = require("express-rate-limit");
 const certificateController = require("../controllers/certificateController");
 const auth = require("../middleware/authMiddleware");
 
 const router = express.Router();
+
+// Rate limiter for write/action endpoints (share, whatsapp, email)
+const actionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { msg: "Too many requests, please try again later." },
+});
 
 // Create new certificate
 router.post(
@@ -40,8 +50,8 @@ router.delete("/:id", auth, certificateController.deleteCertificate);
 router.post("/:id/email", auth, certificateController.emailCertificate);
 
 // WhatsApp share
-router.post("/:id/whatsapp", auth, certificateController.whatsappCertificate);
+router.post("/:id/whatsapp", auth, actionLimiter, certificateController.whatsappCertificate);
 
-router.post("/:id/share", auth, certificateController.shareCertificate);
+router.post("/:id/share", auth, actionLimiter, certificateController.shareCertificate);
 
 module.exports = router;

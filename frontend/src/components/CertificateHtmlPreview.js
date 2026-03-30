@@ -346,9 +346,10 @@ const CertificateHtmlPreview = ({ cert = {}, qrDataUrl = null }) => {
           <Typography sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "8px", color: "#666", mb: 0.75 }}>
             Certified By:
           </Typography>
-         <Box component="img" src="/assets/cak-badge.png" alt="CAK" sx={{ width: 52, height: 52, objectFit: "contain" }} />
-            <Box component="img" src="/assets/kebs-badge.png" alt="KEBS" sx={{ width: 52, height: 52, objectFit: "contain" }} />
-            <Box component="img" src="/assets/odpc-badge.png" alt="ODPC" sx={{ width: 52, height: 52, objectFit: "contain" }} />
+          <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center" }}>
+            <Box component="img" src="/assets/kebs-badge.png" alt="KEBS" sx={{ width: 52, height: 52, objectFit: "contain", mx: 0.5 }} />
+            <Box component="img" src="/assets/odpc-badge.png" alt="ODPC" sx={{ width: 52, height: 52, objectFit: "contain", mx: 0.5 }} />
+            <Box component="img" src="/assets/cak-badge.png" alt="CAK" sx={{ width: 52, height: 52, objectFit: "contain", mx: 0.5 }} />
           </Box>
         </Box>
 
