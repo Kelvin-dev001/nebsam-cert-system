@@ -439,10 +439,10 @@ const CertificateDocument = ({ cert = {}, qr = null }) => {
 
         {/* ── HEADER ─────────────────────────────────────────────────── */}
         <View style={S.header}>
-          <Image style={S.logo} src="/nebsam_logo.png" />
+          <Image style={S.logo} src="/nebsam-logo.png" />
           <View style={S.headerTextWrap}>
             <Text style={S.headerBrand}>NEBSAM</Text>
-            <Text style={S.headerTagline}>Smart Tracking &amp; Telematics Solutions</Text>
+            <Text style={S.headerTagline}>We Are The Solution</Text>
           </View>
         </View>
 
@@ -484,7 +484,7 @@ const CertificateDocument = ({ cert = {}, qr = null }) => {
                 <Text style={S.companyName}>Nebsam Digital Solutions (K) Ltd</Text>
                 <Text style={S.companyDetail}>HQ-MSA Makupa Roundabout Nxt To Mass Petrol Station</Text>
                 <Text style={S.companyDetail}>info@nebsamdigital.com</Text>
-                <Text style={S.companyDetail}>www.nebsamdigital.co.m</Text>
+                <Text style={S.companyDetail}>www.nebsamdigital.com</Text>
                 {qr && <Image style={S.qrSmall} src={qr} />}
               </View>
             </View>
