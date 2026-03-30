@@ -560,6 +560,7 @@ const CertificateDocument = ({ cert = {}, qr = null }) => {
       
               <Image style={S.badge} src="/assets/kebs-badge.png" />
               <Image style={S.badge} src="/assets/odpc-badge.png" />
+              <Image style={S.badge} src="/assets/cak-badge.png" />
             </View>
           </View>
 
