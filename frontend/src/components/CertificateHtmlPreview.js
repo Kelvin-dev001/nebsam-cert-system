@@ -346,33 +346,7 @@ const CertificateHtmlPreview = ({ cert = {}, qrDataUrl = null }) => {
           <Typography sx={{ fontFamily: "'Roboto', sans-serif", fontSize: "8px", color: "#666", mb: 0.75 }}>
             Certified By:
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {/* NTSA styled placeholder badge */}
-            <Box
-              sx={{
-                width: 52,
-                height: 52,
-                backgroundColor: NAVY,
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              <Typography
-                sx={{
-                  fontFamily: "'Lora', serif",
-                  fontWeight: 700,
-                  fontSize: "8px",
-                  color: WHITE,
-                  textAlign: "center",
-                  lineHeight: 1.3,
-                }}
-              >
-                NTSA<br />Certified
-              </Typography>
-            </Box>
+         <Box component="img" src="/assets/cak-badge.png" alt="CAK" sx={{ width: 52, height: 52, objectFit: "contain" }} />
             <Box component="img" src="/assets/kebs-badge.png" alt="KEBS" sx={{ width: 52, height: 52, objectFit: "contain" }} />
             <Box component="img" src="/assets/odpc-badge.png" alt="ODPC" sx={{ width: 52, height: 52, objectFit: "contain" }} />
           </Box>
