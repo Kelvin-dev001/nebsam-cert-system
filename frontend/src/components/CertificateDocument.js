@@ -557,9 +557,7 @@ const CertificateDocument = ({ cert = {}, qr = null }) => {
             <Text style={S.badgesLabel}>Certified By:</Text>
             <View style={S.badgesRow}>
               {/* NTSA: styled placeholder (replace with Image when ntsa-badge.png is available) */}
-              <View style={S.ntsaBadge}>
-                <Text style={S.ntsaBadgeText}>NTSA{"\n"}Certified</Text>
-              </View>
+      
               <Image style={S.badge} src="/assets/kebs-badge.png" />
               <Image style={S.badge} src="/assets/odpc-badge.png" />
             </View>
