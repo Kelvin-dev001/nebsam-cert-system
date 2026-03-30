@@ -332,9 +332,10 @@ const S = StyleSheet.create({
     alignItems: "center",
   },
   badgesLabel: {
-    fontFamily: "Roboto",
-    fontSize: 7,
-    color: "#666",
+    fontFamily: "Lora",
+    fontWeight: "bold",
+    fontSize: 10,
+    color: NAVY,
     marginBottom: 5,
     textAlign: "center",
   },
@@ -403,7 +404,7 @@ const S = StyleSheet.create({
 });
 
 // ── Helper: date formatter ──────────────────────────────────────────────────
-const fmt = (d) => (d ? String(d).slice(0, 10) : "\u2014");
+const fmt = (d) => (d ? String(d).slice(0, 10) : "");
 
 // ── Helper: section header bar ──────────────────────────────────────────────
 const SectionHeader = ({ title }) => (
@@ -419,7 +420,7 @@ const FieldRow = ({ label, value, bold }) => (
   <View style={S.row}>
     <Text style={S.label}>{label}</Text>
     <Text style={S.colon}>:</Text>
-    <Text style={bold ? S.valueBold : S.value}>{value || "\u2014"}</Text>
+    <Text style={bold ? S.valueBold : S.value}>{value || ""}</Text>
   </View>
 );
 
@@ -472,7 +473,7 @@ const CertificateDocument = ({ cert = {}, qr = null }) => {
                   <Text style={S.label}>Serial No</Text>
                   <Text style={S.colon}>:</Text>
                   <View style={S.serialBox}>
-                    <Text style={S.serialText}>{cert.certificateSerialNo || "\u2014"}</Text>
+                    <Text style={S.serialText}>{cert.certificateSerialNo || ""}</Text>
                   </View>
                 </View>
                 <FieldRow label="Date of Issue" value={fmt(cert.dateOfIssue)} />
