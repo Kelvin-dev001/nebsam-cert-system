@@ -21,9 +21,10 @@ Font.register({
 Font.register({ family: "Roboto", src: "/fonts/Roboto-Regular.ttf" });
 
 // ── Design tokens ───────────────────────────────────────────────────────────
-const NAVY = "#0000FF";
-const GOLD = "#000080";
+const NAVY = "#1B2A4A";
+const GOLD = "#C5962A";
 const WHITE = "#FFFFFF";
+
 
 // ── Styles ──────────────────────────────────────────────────────────────────
 const S = StyleSheet.create({
