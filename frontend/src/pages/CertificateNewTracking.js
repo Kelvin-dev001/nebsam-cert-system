@@ -10,7 +10,7 @@ import { AuthContext } from "../context/AuthContext";
 // Full list of vehicle makes
 const makes = [
   "Toyota", "Nissan", "Isuzu", "Mazda", "Mitsubishi", "Honda", "Subaru", "Suzuki", "Ford", "Volkswagen",
-  "Mercedes-Benz", "BMW", "Chevrolet", "Hyundai", "Kia", "Land Rover", "Peugeot", "Fiat", "Jeep", "Scania", "DAF"
+  "Mercedes-Benz","Mercedes-Benz Actross", "Mercedes-Benz MP4", "Sinotrack-Howo", "BMW", "Chevrolet", "Hyundai", "Kia", "Land Rover", "Peugeot", "Fiat", "Jeep", "Scania", "DAF"
 ];
 
 // Full list of body types
