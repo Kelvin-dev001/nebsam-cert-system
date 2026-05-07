@@ -28,6 +28,7 @@ const trackingDevices = [
   "Nebsam Hybrid Tracker",
   "Nebsam Comprehensive Hybrid Tracker",
   "Nebsam Bluetooth Tracker",
+  "Nebsam Vehicle Video Telematics",
   "Nebsam Bluetooth Tracker Pro",
   "Nebsam Tipper Tracker"
 ];
